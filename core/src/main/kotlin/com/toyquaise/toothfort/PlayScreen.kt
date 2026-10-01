@@ -36,7 +36,7 @@ import kotlin.math.tan
 class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAdapter(), HudListener {
     val game = Game(Levels.all[levelIndex])
     private val view = WorldView(app.models, game)
-    private val camera = PerspectiveCamera(34f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
+    private val camera = PerspectiveCamera(30f, Gdx.graphics.width.toFloat(), Gdx.graphics.height.toFloat())
     private val stage = Stage(ExtendViewport(UI_WIDTH, UI_HEIGHT), app.batch)
     private val hud = Hud(app.kit, stage, this)
     private val shapes = ShapeRenderer()
@@ -222,6 +222,8 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
         }
         game.events.clear()
         view.update(dt)
+        // The desktop pointer sits somewhere in the window; keep its highlight out of screenshots.
+        if (app.options.screenshot != null) view.hover = null
         if (hud.selected != null && game.board.partAt(hud.selected!!.cell) !== hud.selected) select(null)
 
         Gdx.gl.glClearColor(Palette.table.r, Palette.table.g, Palette.table.b, 1f)
@@ -264,12 +266,12 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
             if (e.health >= e.kind.health) continue
             val at = game.path.at(e.distance)
             if (!toStage(at.x.toFloat(), 0.85f, at.y.toFloat())) continue
-            val w = 34f
+            val w = 28f
             val f = (e.health / e.kind.health).toFloat().coerceIn(0f, 1f)
             shapes.color = Palette.ink
-            shapes.rect(stagePos.x - w / 2 - 2, stagePos.y - 2, w + 4, 8f)
-            shapes.color = if (f > 0.5f) Palette.turquoise else Palette.coral
-            shapes.rect(stagePos.x - w / 2, stagePos.y, w * f, 4f)
+            shapes.rect(stagePos.x - w / 2 - 1.5f, stagePos.y - 1.5f, w + 3f, 6f)
+            shapes.color = if (f > 0.5f) Palette.meterOk else Palette.coral
+            shapes.rect(stagePos.x - w / 2, stagePos.y, w * f, 3f)
         }
         shapes.end()
 
@@ -277,34 +279,26 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
         batch.projectionMatrix = uiCam.combined
         batch.begin()
         if (hud.meters) {
+            // A small dark tag over every machine with the voltage it really gets.
             for (p in game.board.allParts) {
-                val text: String
-                val color: Color
-                when (p.kind.role) {
-                    Role.MACHINE -> {
-                        if (p.broken) { text = "yandı"; color = Palette.brick }
-                        else {
-                            text = Strings.volts(abs(p.volts))
-                            color = when {
-                                p.performance == 0.0 -> Palette.inkSoft
-                                p.voltageRatio > 1.1 -> Palette.brick
-                                p.voltageRatio < 0.85 -> Palette.coral
-                                else -> Palette.teal
-                            }
-                        }
-                    }
-                    Role.BATTERY -> { text = Strings.percent(p.charge); color = if (p.charge > 0.3) Palette.teal else Palette.brick }
-                    else -> continue
+                if (p.kind.role != Role.MACHINE) continue
+                val text = if (p.broken) "yandı" else Strings.volts(abs(p.volts))
+                val color = when {
+                    p.broken -> Palette.coral
+                    p.performance == 0.0 -> Palette.steel
+                    p.voltageRatio > 1.1 -> Palette.coral
+                    p.voltageRatio < 0.85 -> Palette.yellow
+                    else -> Palette.meterOk
                 }
-                BoardSpace.center(p.cell, 0.95f, screen)
+                BoardSpace.center(p.cell, 1.05f, screen)
                 if (!toStage(screen.x, screen.y, screen.z)) continue
                 val font = app.kit.small
                 app.layout.setText(font, text)
-                val w = app.layout.width + 14f
-                val h = app.layout.height + 12f
-                app.kit.slab(Palette.surface, 10, 2).draw(batch, stagePos.x - w / 2, stagePos.y - 2, w, h + 2)
+                val w = app.layout.width + 12f
+                val h = app.layout.height + 9f
+                app.kit.slab(Palette.ink, 9, 0).draw(batch, stagePos.x - w / 2, stagePos.y, w, h)
                 font.color = color
-                font.draw(batch, text, stagePos.x - app.layout.width / 2, stagePos.y + h - 5)
+                font.draw(batch, text, stagePos.x - app.layout.width / 2, stagePos.y + h - 4.5f)
             }
         }
         for (f in view.floaters) {
@@ -336,7 +330,7 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
 
     /**
      * Frames the board between the HUD's top bar and toolbox: a fixed tilt, then the distance
-     * at which the board, the tooth and the candy jar just fit, then centred in that band.
+     * at which the board, the tooth and the candy jar just fit, resting on the toolbox.
      */
     private fun fitCamera(width: Int, height: Int) {
         camera.viewportWidth = width.toFloat()
@@ -349,12 +343,14 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
         val w = game.level.width.toFloat()
         val h = game.level.height.toFloat()
         val tooth = game.level.tooth
+        val entry = com.toyquaise.toothfort.render.BoardMeshes.entryOf(game.level)
         val points = listOf(
-            Vector3(-0.35f, 0f, -1.0f), Vector3(w + 0.35f, 0f, -1.0f),
-            Vector3(-0.35f, 0f, h + 0.35f), Vector3(w + 0.35f, 0f, h + 0.35f),
-            Vector3(tooth.x + 0.5f, 1.5f, tooth.y + 0.5f), Vector3(w / 2, 0.7f, -0.8f),
+            Vector3(-0.25f, 0f, -0.25f), Vector3(w + 0.25f, 0f, -0.25f),
+            Vector3(-0.25f, 0f, h + 0.25f), Vector3(w + 0.25f, 0f, h + 0.25f),
+            Vector3(tooth.x + 0.5f, 1.75f, tooth.y + 0.5f),
+            Vector3(entry.x + 0.5f, 0.75f, entry.y + 0.5f), Vector3(entry.x + 0.5f, 0f, entry.y + 0.2f),
         )
-        val pitch = 56f * MathUtils.degreesToRadians
+        val pitch = 47f * MathUtils.degreesToRadians
         val dir = Vector3(0f, -MathUtils.sin(pitch), -MathUtils.cos(pitch))
         focus.set(w / 2, 0f, h / 2)
         val target = Vector3(focus)
@@ -374,7 +370,7 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
             }
             return floatArrayOf(minX, maxX, minY, maxY)
         }
-        val margin = width * 0.025f
+        val margin = width * 0.012f
         var d = 20f
         repeat(4) {
             var lo = 4f
@@ -387,9 +383,10 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
             }
             d = hi
             place(d)
-            // Slide the camera so the board sits in the middle of the free band.
+            // Slide the camera so the board sits just above the toolbox; the room left at the top
+            // is where the part card and the notes appear.
             val b = bounds()
-            val shift = (top + bottom) / 2 - (b[2] + b[3]) / 2
+            val shift = (bottom + height * 0.01f) - b[2]
             val worldPerPixel = 2f * d * tan(camera.fieldOfView / 2 * MathUtils.degreesToRadians) / height
             val up = Vector3(camera.up)
             target.mulAdd(up, -shift * worldPerPixel)
@@ -415,6 +412,6 @@ class PlayScreen(private val app: ToothFortGame, val levelIndex: Int) : ScreenAd
         const val UI_WIDTH = 540f
         const val UI_HEIGHT = 960f
         const val TOP_BAR = 84f
-        const val BOTTOM_BAR = 186f
+        const val BOTTOM_BAR = 162f
     }
 }

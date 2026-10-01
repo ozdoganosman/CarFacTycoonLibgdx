@@ -31,9 +31,9 @@ Android Studio ile projeyi açmak yeterli. Android SDK yoksa (`ANDROID_HOME` ya 
 
 ```bash
 # Bölüm 2'yi aç, örnek bir savunma kur, dalganın 9 saniyesini oynat, ekran görüntüsü al ve çık:
-./gradlew :lwjgl3:run --args="--level 2 --demo --seconds 9 --screenshot shot.png"
+./gradlew :lwjgl3:run --args="--level 2 --demo --seconds 9 --screenshot $PWD/shot.png"
 # Bir kareye yakından bak (modelleri denetlemek için), arayüz olmadan:
-./gradlew :lwjgl3:run --args="--demo --close-up 3,2 --no-hud"
+./gradlew :lwjgl3:run --args="--level 2 --demo --close-up 3,3 --no-hud"
 # Pencere boyutu: --size 1080x2340
 ```
 

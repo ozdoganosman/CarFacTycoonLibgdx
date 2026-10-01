@@ -28,7 +28,7 @@ class ClayRenderer : Disposable {
     private val grain: Texture
 
     /** Direction toward the light: from the upper left and behind, like the site's drop shadow. */
-    val lightDir: Vector3 = Vector3(-0.55f, 1.35f, -0.85f).nor()
+    val lightDir: Vector3 = Vector3(-0.62f, 1.1f, -0.78f).nor()
     private val lightCam = OrthographicCamera()
     private lateinit var camera: Camera
 

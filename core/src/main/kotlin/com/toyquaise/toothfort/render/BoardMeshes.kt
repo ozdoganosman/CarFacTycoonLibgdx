@@ -15,7 +15,7 @@ import com.toyquaise.toothfort.logic.game.Level
 /** World position of things on the board: cell (x, y) is centred on (x + 0.5, ·, y + 0.5). */
 object BoardSpace {
     /** Where candies walk: the top of the gum road. */
-    const val ROAD_TOP = 0.08f
+    const val ROAD_TOP = 0.052f
 
     fun center(c: Cell, y: Float = 0f, out: Vector3 = Vector3()): Vector3 = out.set(c.x + 0.5f, y, c.y + 0.5f)
 
@@ -27,7 +27,7 @@ object BoardSpace {
         Dir.S -> -90f
     }
 
-    fun wireHeight(board: Board, c: Cell): Float = if (board.inside(c) && board.terrain(c) == Terrain.PATH) 0.13f else 0.075f
+    fun wireHeight(board: Board, c: Cell): Float = if (board.inside(c) && board.terrain(c) == Terrain.PATH) 0.1f else 0.075f
 
     /** Where a wire leaving [c] toward [side] starts: a part's terminal knob, or the cell's middle. */
     fun wireEnd(board: Board, c: Cell, side: Dir, out: Vector3): Vector3 {
@@ -44,33 +44,58 @@ object BoardSpace {
 }
 
 object BoardMeshes {
-    /** The table tray, the clay tiles and the pink gum road. Built once per level. */
+    /**
+     * The mint table, one slab of turquoise dough for the board with a pressed dot at every
+     * cell corner, and the pink gum road. Built once per level.
+     */
     fun board(level: Level): MeshData {
         val m = MeshData()
         val w = level.width.toFloat()
         val h = level.height.toFloat()
-        m.color(Palette.tray).roundedBox(w / 2, -0.2f, h / 2, w / 2 + 0.3f, 0.16f, h / 2 + 0.3f, 0.16f, slices = 24, stacks = 12)
-        for (y in 0 until level.height) for (x in 0 until level.width) {
-            val c = Cell(x, y)
-            if (level.terrain(c) != Terrain.GROUND) continue
-            m.color(if ((x + y) % 2 == 0) Palette.tileA else Palette.tileB)
-            m.roundedBox(x + 0.5f, -0.06f, y + 0.5f, 0.47f, 0.06f, 0.47f, 0.06f, slices = 12, stacks = 8)
+        // The table the board sits on (it catches the board's shadow).
+        m.color(Palette.table).roundedBox(w / 2, -0.62f, h / 2, 40f, 0.2f, 40f, 0.1f, slices = 8, stacks = 4)
+        // The board: a thick slab with soft edges, and a darker lip under it.
+        m.color(Palette.boardLip).roundedBox(w / 2, -0.3f, h / 2, w / 2 + 0.26f, 0.13f, h / 2 + 0.26f, 0.13f, slices = 28, stacks = 12)
+        m.color(Palette.board).roundedBox(w / 2, -0.12f, h / 2, w / 2 + 0.22f, 0.12f, h / 2 + 0.22f, 0.12f, slices = 28, stacks = 12)
+        // A tongue of board under the road's entry, where the candy jar stands.
+        val e = entryOf(level)
+        m.color(Palette.boardLip).roundedBox(e.x + 0.5f, -0.3f, e.y + 0.5f, 0.6f, 0.13f, 0.6f, 0.13f, slices = 16, stacks = 8)
+        m.color(Palette.board).roundedBox(e.x + 0.5f, -0.12f, e.y + 0.5f, 0.56f, 0.12f, 0.56f, 0.12f, slices = 16, stacks = 8)
+        // Pressed dots at the cell corners: the grid, without tiles.
+        m.color(Palette.boardDot)
+        for (y in 0..level.height) for (x in 0..level.width) {
+            m.ball(x.toFloat(), 0f, y.toFloat(), 0.045f, 0.012f, 0.045f, slices = 10, stacks = 5)
         }
-        // The road: a fat snake of gum, pressed flat.
+        // The road: a fat snake of gum, pressed almost flat into the board.
         val cells = level.path.cells
-        val first = cells[0]
-        val entry = Cell(first.x - (cells[1].x - first.x), first.y - (cells[1].y - first.y))
-        val points = (listOf(entry) + cells).map { Vector3(it.x + 0.5f, 0f, it.y + 0.5f) }
-        val road = MeshData().color(Palette.gum).tube(MeshData.smooth(points, 3), 0.44f, sides = 18)
-        m.append(road, Matrix4().scale(1f, 0.18f, 1f))
-        // Cell marks along the road, so wires over it still read as a grid.
-        for (c in cells.dropLast(1)) {
-            m.color(Palette.gumDark).ball(c.x + 0.5f, ROAD_DOT_Y, c.y + 0.5f, 0.05f, 0.012f, 0.05f, slices = 10, stacks = 5)
+        val points = (listOf(e) + cells).map { Vector3(it.x + 0.5f, 0f, it.y + 0.5f) }
+        m.append(MeshData().color(Palette.gumDark).tube(MeshData.smooth(points, 3), 0.46f, sides = 18), Matrix4().translate(0f, -0.01f, 0f).scale(1f, 0.09f, 1f))
+        m.append(MeshData().color(Palette.gum).tube(MeshData.smooth(points, 3), 0.4f, sides = 18), Matrix4().scale(1f, 0.13f, 1f))
+        // Sprinkles on the road, like on a cake.
+        val sprinkleColors = listOf(Palette.yellow, Palette.surface, Palette.grape, Palette.turquoise, Palette.coral)
+        for ((i, c) in cells.dropLast(1).withIndex()) {
+            for (k in 0 until 2) {
+                val a = hash(c.x * 13 + c.y * 7 + k * 101) * 6.283f
+                val ox = (hash(c.x * 5 + c.y * 11 + k * 37) - 0.5f) * 0.55f
+                val oz = (hash(c.x * 17 + c.y * 3 + k * 53) - 0.5f) * 0.55f
+                val cx = c.x + 0.5f + ox
+                val cz = c.y + 0.5f + oz
+                val dx = kotlin.math.cos(a) * 0.05f
+                val dz = kotlin.math.sin(a) * 0.05f
+                m.color(sprinkleColors[(i * 2 + k) % sprinkleColors.size])
+                m.tube(listOf(Vector3(cx - dx, ROAD_TOP - 0.005f, cz - dz), Vector3(cx + dx, ROAD_TOP - 0.005f, cz + dz)), 0.018f, sides = 6)
+            }
         }
         return m
     }
 
-    private const val ROAD_DOT_Y = 0.078f
+    private const val ROAD_TOP = BoardSpace.ROAD_TOP
+
+    /** The cell just before the road's first cell, off the board, where candies come from. */
+    fun entryOf(level: Level): Cell {
+        val cells = level.path.cells
+        return Cell(cells[0].x - (cells[1].x - cells[0].x), cells[0].y - (cells[1].y - cells[0].y))
+    }
 
     /** Every wire as a rolled snake of dough, and a blob where wires meet in a cell. */
     fun wires(board: Board, seed: Int): MeshData {

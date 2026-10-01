@@ -174,11 +174,11 @@ class WorldView(private val models: Models, private val game: Game) : Disposable
         r.draw(boardMesh, m.idt(), Color.WHITE, wobble = 0.03f).apply { grain = 0.5f }
 
         // The candy jar at the road's entry.
-        val cells = game.path.cells
-        val entry = Cell(cells[0].x - (cells[1].x - cells[0].x), cells[0].y - (cells[1].y - cells[0].y))
-        BoardSpace.center(entry, 0.06f, v)
+        val entry = BoardMeshes.entryOf(game.level)
+        BoardSpace.center(entry, 0f, v)
         r.draw(models.jarCandies, m.setToTranslation(v), Color.WHITE, wobble)
         r.draw(models.jarGlass, m.setToTranslation(v), tint.set(1f, 1f, 1f, 0.42f), 0.01f).apply { castShadow = false; grain = 0.1f }
+        drawProps(r, entry)
 
         drawTooth(r)
 
@@ -204,13 +204,34 @@ class WorldView(private val models: Models, private val game: Game) : Disposable
         drawHover(r)
     }
 
+    /** Toys from the studio's art on the table, on the side away from the candy jar. */
+    private fun drawProps(r: ClayRenderer, entry: Cell) {
+        val w = game.level.width.toFloat()
+        val right = entry.x < game.level.width / 2
+        val table = -0.42f
+        val px = if (right) w - 2.3f else 2.3f
+        m.setToTranslation(px, table + 0.16f, -1.25f).rotate(Vector3.Y, if (right) 7f else -7f)
+        r.draw(models.pencil, m, Color.WHITE, 0.02f, 3f)
+        val bx = if (right) w - 0.2f else 0.2f
+        m.setToTranslation(bx, table, -1.05f).rotate(Vector3.Y, 12f)
+        r.draw(models.block, m, Palette.coral, 0.02f, 5f)
+        m.setToTranslation(bx + (if (right) -0.15f else 0.15f), table + 0.6f, -1.1f).rotate(Vector3.Y, -18f)
+        r.draw(models.block, m, Palette.yellow, 0.02f, 6f)
+        val gx = if (right) 0.4f else w - 0.4f
+        m.setToTranslation(gx, table, -1.55f).rotate(Vector3.Y, time * 6f).scale(0.8f, 0.8f, 0.8f)
+        r.draw(models.gear, m, Color.WHITE, 0.02f, 7f)
+    }
+
     private fun drawTooth(r: ClayRenderer) {
         BoardSpace.center(game.level.tooth, 0.02f, v)
         val bob = sin(time * 2.2f) * 0.015f
         val squash = 1f - 0.12f * toothSquash * sin(toothSquash * 12f)
-        val s = 1.25f
+        val s = 1.3f
         val wide = s * (1f + (1f - squash) * 0.5f)
-        m.setToTranslation(v.x, v.y + bob, v.z).scale(wide, s * squash, wide)
+        r.draw(models.gum, m.setToTranslation(v).scale(s, s, s), Color.WHITE, 0.02f)
+        shadow(r, v.x, v.z, 0.8f, 0.35f)
+        // Leaning back a little so its face looks up at the camera.
+        m.setToTranslation(v.x, v.y + bob, v.z).rotate(Vector3.X, -20f).scale(wide, s * squash, wide)
         val item = r.draw(models.tooth, m, Color.WHITE, 0.02f)
         if (toothFlash > 0) item.flash.set(toothFlash * 0.9f, 0f, 0f, 0f)
         // How healthy: the tooth yellows as it is bitten.
@@ -246,9 +267,19 @@ class WorldView(private val models: Models, private val game: Game) : Disposable
         }
     }
 
+    /** A soft dark patch on the ground under something, so it sits instead of floating. */
+    private fun shadow(r: ClayRenderer, x: Float, z: Float, radius: Float, strength: Float, y: Float = 0.006f) {
+        m2.setToTranslation(x, y, z).scale(radius, 1f, radius)
+        r.draw(models.contactShadow, m2, tint.set(Palette.ink.r, Palette.ink.g, Palette.ink.b, strength), 0f).apply {
+            castShadow = false
+            grain = 0f
+        }
+    }
+
     private fun drawPart(r: ClayRenderer, p: Part) {
         val look = looks[p] ?: return
         BoardSpace.center(p.cell, 0f, v)
+        shadow(r, v.x, v.z, 0.55f, 0.3f)
         val baseYaw = BoardSpace.yaw(p.facing)
         val seed = (p.cell.x * 7 + p.cell.y * 13).toFloat()
         val dead = p.broken && p.kind.role == Role.MACHINE
@@ -259,49 +290,52 @@ class WorldView(private val models: Models, private val game: Game) : Disposable
                 val empty = p.charge <= 0.0
                 r.draw(models.battery, m, if (empty) tint.set(0.6f, 0.6f, 0.6f, 1f) else Color.WHITE, 0.02f, seed)
                 // A charge window on top.
-                m2.set(m).translate(0f, 0.5f, 0.12f).scale(0.42f, 0.035f, 0.09f)
+                m2.set(m).translate(0f, 0.58f, 0.13f).scale(0.44f, 0.04f, 0.1f)
                 r.draw(models.bar, m2, Palette.cream, 0f).castShadow = false
                 if (!empty) {
                     val c = p.charge.toFloat()
-                    m2.set(m).translate(-0.2f + 0.2f * c, 0.515f, 0.12f).scale(0.4f * c, 0.035f, 0.065f)
+                    m2.set(m).translate(-0.21f + 0.21f * c, 0.595f, 0.13f).scale(0.42f * c, 0.04f, 0.075f)
                     r.draw(models.bar, m2, if (c > 0.3f) Palette.yellow else Palette.coral, 0f).apply { emissive = 0.3f; castShadow = false }
                 }
             }
             PartKind.BRUSH -> {
                 r.draw(models.machineBase, m, paint, 0.02f, seed)
-                r.draw(models.brushMotor, m, paint, 0.02f, seed)
+                m2.set(m).translate(0f, Models.PEDESTAL - 0.08f, 0f)
+                r.draw(models.brushMotor, m2, paint, 0.02f, seed)
                 val scrub = if (look.scrub > 0 && !dead) sin(time * 55f) * 0.035f else 0f
-                m2.setToTranslation(v).rotate(Vector3.Y, look.headYaw).translate(scrub, 0f, 0f)
+                m2.setToTranslation(v.x, v.y + Models.PEDESTAL - 0.08f, v.z).rotate(Vector3.Y, look.headYaw).translate(scrub, 0f, 0f)
                 if (dead) m2.rotate(Vector3.X, 25f)
                 r.draw(models.brush, m2, paint, 0.015f, seed)
             }
             PartKind.PASTE_CANNON -> {
                 r.draw(models.machineBase, m, paint, 0.02f, seed)
-                r.draw(models.cradle, m, paint, 0.02f, seed)
-                m2.setToTranslation(v.x, 0.48f, v.z).rotate(Vector3.Y, look.headYaw).rotate(Vector3.Z, 14f).translate(-look.recoil * 0.06f, 0f, 0f)
+                m2.set(m).translate(0f, Models.PEDESTAL - 0.12f, 0f)
+                r.draw(models.cradle, m2, paint, 0.02f, seed)
+                m2.setToTranslation(v.x, 0.48f + Models.PEDESTAL - 0.12f, v.z).rotate(Vector3.Y, look.headYaw).rotate(Vector3.Z, 14f).translate(-look.recoil * 0.06f, 0f, 0f)
                 val squash = 1f + look.recoil * 0.12f
                 m2.scale(1f / squash, squash, squash)
                 r.draw(models.pasteTube, m2, paint, 0.015f, seed)
             }
             PartKind.LASER -> {
                 r.draw(models.machineBase, m, paint, 0.02f, seed)
-                r.draw(models.laserStand, m, paint, 0.02f, seed)
-                m2.setToTranslation(v.x, 0.6f, v.z).rotate(Vector3.Y, look.headYaw).rotate(Vector3.Z, -8f)
+                m2.set(m).translate(0f, Models.PEDESTAL - 0.12f, 0f)
+                r.draw(models.laserStand, m2, paint, 0.02f, seed)
+                m2.setToTranslation(v.x, 0.6f + Models.PEDESTAL - 0.12f, v.z).rotate(Vector3.Y, look.headYaw).rotate(Vector3.Z, -8f)
                 r.draw(models.laserHead, m2, paint, 0.015f, seed)
             }
             PartKind.SWITCH -> {
-                r.draw(models.machineBase, m, Color.WHITE, 0.02f, seed)
+                r.draw(models.componentBase, m, Color.WHITE, 0.02f, seed)
                 r.draw(models.switchPosts, m, Color.WHITE, 0.01f, seed)
                 m2.set(m).translate(-0.2f, 0.25f, 0f).rotate(Vector3.Z, if (p.closed) 0f else 50f)
                 r.draw(models.switchLever, m2, Color.WHITE, 0.01f, seed)
             }
             PartKind.FUSE -> {
-                r.draw(models.machineBase, m, Color.WHITE, 0.02f, seed)
+                r.draw(models.componentBase, m, Color.WHITE, 0.02f, seed)
                 r.draw(models.fuseWire, m, if (p.broken) Palette.charcoal else Palette.steel, 0.005f, seed)
                 r.draw(models.fuse, m, tint.set(1f, 1f, 1f, 0.55f), 0.005f, seed).castShadow = false
             }
             PartKind.RESISTOR -> {
-                r.draw(models.machineBase, m, Color.WHITE, 0.02f, seed)
+                r.draw(models.componentBase, m, Color.WHITE, 0.02f, seed)
                 r.draw(models.resistor, m, Color.WHITE, 0.015f, seed)
             }
         }
@@ -318,23 +352,24 @@ class WorldView(private val models: Models, private val game: Game) : Disposable
         val z = at.y.toFloat()
         val ground = BoardSpace.ROAD_TOP
         val phase = time * e.kind.speed.toFloat() * 5.5f + e.id
+        shadow(r, x, z, if (e.kind == EnemyKind.SUGAR_CUBE) 0.32f else 0.38f, 0.32f, ground + 0.006f)
         val item = when (e.kind) {
             EnemyKind.SUGAR_CUBE -> {
                 val hop = abs(sin(phase)) * 0.12f
                 val squash = 1f - 0.18f * (1f - abs(sin(phase))).let { it * it * it }
-                m.setToTranslation(x, ground + 0.21f * squash + hop, z).rotate(Vector3.Y, yaw).scale(1f / squash.coerceAtLeast(0.85f), squash, 1f / squash.coerceAtLeast(0.85f))
+                m.setToTranslation(x, ground + 0.24f * squash + hop, z).rotate(Vector3.Y, yaw).scale(1f / squash.coerceAtLeast(0.85f), squash, 1f / squash.coerceAtLeast(0.85f))
                 r.draw(models.sugarCube, m, Color.WHITE, 0.03f, boil).apply { grain = 1.1f; grainScale = 6f }
             }
             EnemyKind.GUMMY_BEAR -> {
                 val waddle = sin(phase) * 9f
-                m.setToTranslation(x, ground + abs(sin(phase)) * 0.03f, z).rotate(Vector3.Y, yaw).rotate(Vector3.X, waddle).scale(1.3f, 1.3f, 1.3f)
+                m.setToTranslation(x, ground + abs(sin(phase)) * 0.03f, z).rotate(Vector3.Y, yaw).rotate(Vector3.X, waddle).scale(1.5f, 1.5f, 1.5f)
                 val body = r.draw(models.gummyBear, m, gummyColor(e.id), 0.025f, boil)
                 r.draw(models.gummyFace, m, Color.WHITE, 0.01f, boil)
                 body
             }
             EnemyKind.LOLLIPOP -> {
                 val hop = abs(sin(phase * 0.6f)) * 0.2f
-                m.setToTranslation(x, ground + hop, z).rotate(Vector3.Y, yaw).rotate(Vector3.X, sin(phase * 0.6f) * 6f).scale(1.35f, 1.35f, 1.35f)
+                m.setToTranslation(x, ground + hop, z).rotate(Vector3.Y, yaw).rotate(Vector3.X, sin(phase * 0.6f) * 6f).scale(1.5f, 1.5f, 1.5f)
                 r.draw(models.lollipop, m, Color.WHITE, 0.03f, boil)
             }
         }
@@ -344,7 +379,7 @@ class WorldView(private val models: Models, private val game: Game) : Disposable
     private fun drawBeams(r: ClayRenderer) {
         for ((p, e) in game.beams) {
             val at = game.path.at(e.distance)
-            BoardSpace.center(p.cell, 0.6f, v)
+            BoardSpace.center(p.cell, 0.6f + Models.PEDESTAL - 0.12f, v)
             v2.set(at.x.toFloat(), BoardSpace.ROAD_TOP + 0.2f, at.y.toFloat())
             val dir = v2.cpy().sub(v)
             val len = dir.len()

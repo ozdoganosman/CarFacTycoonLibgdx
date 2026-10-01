@@ -77,9 +77,9 @@ class CandyPath(val waypoints: List<Cell>) {
 }
 
 enum class EnemyKind(val health: Double, val speed: Double, val reward: Int, val bite: Int) {
-    SUGAR_CUBE(health = 18.0, speed = 1.1, reward = 3, bite = 1),
-    GUMMY_BEAR(health = 60.0, speed = 0.7, reward = 7, bite = 2),
-    LOLLIPOP(health = 450.0, speed = 0.4, reward = 40, bite = 8),
+    SUGAR_CUBE(health = 18.0, speed = 0.9, reward = 3, bite = 1),
+    GUMMY_BEAR(health = 60.0, speed = 0.6, reward = 7, bite = 2),
+    LOLLIPOP(health = 450.0, speed = 0.35, reward = 40, bite = 8),
 }
 
 /** [count] candies of one kind, one every [interval] seconds, starting [delay] seconds into the wave. */
@@ -99,8 +99,8 @@ class Level(
     val parts: Set<PartKind>,
     val gauges: Set<WireGauge>,
     val waves: List<Wave>,
-    val width: Int = 8,
-    val height: Int = 12,
+    val width: Int = 6,
+    val height: Int = 9,
 ) {
     val tooth: Cell get() = path.cells.last()
     private val pathCells = path.cells.toHashSet()
@@ -121,7 +121,7 @@ object Levels {
     /** Level 1: a battery, a wire and the first brush. A simple circuit. */
     val first = Level(
         number = 1,
-        path = CandyPath(listOf(Cell(1, 0), Cell(1, 3), Cell(6, 3), Cell(6, 7), Cell(2, 7), Cell(2, 10), Cell(4, 10), Cell(4, 11))),
+        path = CandyPath(listOf(Cell(1, 0), Cell(1, 2), Cell(4, 2), Cell(4, 5), Cell(1, 5), Cell(1, 7), Cell(3, 7), Cell(3, 8))),
         startMoney = 70,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH),
@@ -138,7 +138,7 @@ object Levels {
     /** Level 2: the 6 V paste ball. Batteries in series for voltage, in parallel to last longer. */
     val second = Level(
         number = 2,
-        path = CandyPath(listOf(Cell(6, 0), Cell(6, 2), Cell(1, 2), Cell(1, 5), Cell(5, 5), Cell(5, 8), Cell(2, 8), Cell(2, 10), Cell(3, 10), Cell(3, 11))),
+        path = CandyPath(listOf(Cell(4, 0), Cell(4, 1), Cell(1, 1), Cell(1, 4), Cell(4, 4), Cell(4, 6), Cell(2, 6), Cell(2, 8))),
         startMoney = 120,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH, PartKind.PASTE_CANNON),
@@ -156,7 +156,7 @@ object Levels {
     /** Level 3: thick wire for the far side, switches to save batteries, and the 12 V laser. */
     val third = Level(
         number = 3,
-        path = CandyPath(listOf(Cell(0, 1), Cell(5, 1), Cell(5, 4), Cell(2, 4), Cell(2, 7), Cell(6, 7), Cell(6, 10), Cell(4, 10), Cell(4, 11))),
+        path = CandyPath(listOf(Cell(0, 1), Cell(4, 1), Cell(4, 3), Cell(1, 3), Cell(1, 6), Cell(4, 6), Cell(4, 8))),
         startMoney = 200,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH, PartKind.PASTE_CANNON, PartKind.LASER, PartKind.SWITCH),

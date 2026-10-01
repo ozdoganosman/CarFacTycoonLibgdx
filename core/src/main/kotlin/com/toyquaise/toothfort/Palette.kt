@@ -31,8 +31,10 @@ object Palette {
     val mintLine = hex("c7e0da")
 
     // The game's own.
-    val tileA = hex("a3dacd")
-    val tileB = hex("93d1c2")
+    val board = hex("5cc8b6")
+    val boardLip = hex("2e9e90")
+    val boardDot = hex("45b7a4")
+    val meterOk = hex("8ee8d6")
     val tray = hex("3fb0a1")
     val gum = hex("f39cbe")
     val gumDark = hex("e67fa9")

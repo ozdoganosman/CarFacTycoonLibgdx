@@ -97,18 +97,19 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
         top.add(pill(waveLabel, Palette.surface)).expandX()
         top.add(pill(moneyLabel, Palette.yellow)).expandX().right()
         root.add(top).growX().pad(12f, 12f, 4f, 12f).row()
+        // The part card sits at the top, over the candies' entry, so the tooth stays in view.
+        root.add(info).growX().pad(2f, 10f, 0f, 10f).row()
         root.add(toastBox).width(500f).padTop(4f).row()
         root.add().expand().row()
-        root.add(info).growX().pad(0f, 10f, 6f, 10f).row()
 
-        val bottom = Table().apply { background = kit.slab(Palette.tray, 22, 0) }
+        val bottom = Table().apply { background = kit.slab(Palette.surface, 26, 0) }
         val scroll = ScrollPane(tools).apply { setScrollingDisabled(false, true); setOverscroll(true, false); fadeScrollBars = false }
-        bottom.add(scroll).growX().height(86f).pad(10f, 8f, 4f, 8f).row()
+        bottom.add(scroll).growX().height(76f).pad(10f, 8f, 2f, 8f).row()
         val actions = Table()
-        actions.add(metersButton).height(58f).padRight(8f)
-        actions.add(speedButton).width(70f).height(58f).padRight(8f)
-        actions.add(startButton).growX().height(58f)
-        bottom.add(actions).growX().pad(4f, 10f, 14f, 10f)
+        actions.add(metersButton).height(52f).padRight(8f)
+        actions.add(speedButton).width(64f).height(52f).padRight(8f)
+        actions.add(startButton).growX().height(52f)
+        bottom.add(actions).growX().pad(4f, 10f, 12f, 10f)
         root.add(bottom).growX()
 
         stage.addActor(endCard)
@@ -147,20 +148,42 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
         if (hint.isNotEmpty()) showToast(hint, 9f)
     }
 
+    /** Each tool is a slab of its own dough colour; the chosen one turns dark. */
+    private fun toolColor(t: Tool): Pair<Color, Color> = when (t) {
+        is Tool.Place -> when (t.kind) {
+            PartKind.BATTERY -> Palette.turquoise to Palette.surface
+            PartKind.BRUSH -> Palette.yellow to Palette.ink
+            PartKind.PASTE_CANNON -> Palette.coral to Palette.surface
+            PartKind.LASER -> Palette.grape to Palette.surface
+            else -> Palette.cream to Palette.ink
+        }
+        is Tool.Wiring -> (if (t.gauge == WireGauge.THICK) Palette.coral else Palette.yellow).let { Palette.cream to Palette.ink }
+        Tool.Erase -> Palette.pink to Palette.ink
+        Tool.Select -> Palette.surface to Palette.ink
+    }
+
     private fun addTool(t: Tool, name: String, cost: String) {
+        val (color, ink) = toolColor(t)
         val style = Button.ButtonStyle().apply {
-            up = kit.slab(Palette.surface, 16, 5)
-            down = kit.slab(Palette.cream, 16, 5)
-            checked = kit.slab(Palette.yellow, 16, 5)
+            up = kit.slab(color, 16, 5)
+            down = kit.slab(color.cpy().mul(0.9f, 0.9f, 0.9f, 1f), 16, 5)
+            checked = kit.slab(Palette.ink, 16, 5)
         }
         val b = Button(style)
-        b.add(kit.label(name, kit.tool)).row()
-        if (cost.isNotEmpty()) b.add(kit.label(cost, kit.small, Palette.inkSoft))
+        val nameLabel = kit.label(name, kit.tool, ink)
+        val costLabel = kit.label(cost, kit.small, ink)
+        b.add(nameLabel).row()
+        if (cost.isNotEmpty()) b.add(costLabel)
         b.pad(4f, 9f, 8f, 9f)
-        b.addListener(changed { tool = if (b.isChecked) t else Tool.Select })
+        b.addListener(changed {
+            tool = if (b.isChecked) t else Tool.Select
+            val c = if (b.isChecked) Palette.surface else ink
+            nameLabel.color = c
+            costLabel.color = c
+        })
         toolGroup.add(b)
         toolButtons[t] = b
-        tools.add(b).height(70f).minWidth(70f).padRight(5f)
+        tools.add(b).height(64f).minWidth(64f).padRight(6f)
     }
 
     fun showToast(text: String, seconds: Float = 2.5f) {
