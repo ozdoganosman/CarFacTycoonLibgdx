@@ -32,6 +32,7 @@ class Blob(val from: Part, var target: Enemy, var position: Vec2, val damage: Do
 
 sealed interface GameEvent {
     data class Hit(val enemy: Enemy, val by: Part) : GameEvent
+    data class Shot(val by: Part) : GameEvent
     data class Splat(val at: Vec2, val radius: Double) : GameEvent
     data class Killed(val enemy: Enemy, val at: Vec2) : GameEvent
     data class Bit(val enemy: Enemy, val damage: Int) : GameEvent
@@ -231,6 +232,7 @@ class Game(val level: Level) {
                 }
                 Attack.BLOB -> if (left <= 0.0) {
                     blobs += Blob(p, t, Vec2.center(p.cell), spec.damage, spec.splash)
+                    events += GameEvent.Shot(p)
                     cooldown[p] = spec.interval / p.performance
                 }
                 Attack.BEAM -> {
