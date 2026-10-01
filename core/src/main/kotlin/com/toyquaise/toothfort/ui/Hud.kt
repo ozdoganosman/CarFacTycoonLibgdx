@@ -70,12 +70,12 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
     }
     private var toastTime = 0f
 
-    private val infoTitle = kit.label("", kit.heading)
+    private val infoTitle = kit.label("", kit.button)
     private val infoText = kit.label("", kit.body).apply { setWrap(true) }
     private val infoButtons = Table()
     private val info = Table().apply {
         background = kit.slab(Palette.surface, 18, 5)
-        pad(12f, 16f, 16f, 16f)
+        pad(8f, 14f, 12f, 14f)
         isVisible = false
     }
 
@@ -212,23 +212,24 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
         }
         infoTitle.setText(Strings.partLong(p.kind))
         infoText.setText(lines.joinToString("\n"))
-        val key = "${System.identityHashCode(p)}:${p.kind.role}:${p.closed}:${p.broken}:${p.charge < 1.0}:${game.phase}"
+        val refill = if (p.kind.role == Role.BATTERY && p.charge < 1.0) game.refillCost(p) else 0
+        val key = "${System.identityHashCode(p)}:${p.closed}:${p.broken}:$refill:${game.refundFor(p)}:${game.phase}"
         if (key == infoKey) return
         infoKey = key
         info.clearChildren()
         info.add(infoTitle).left().row()
-        info.add(infoText).growX().left().padTop(4f).row()
+        info.add(infoText).growX().left().padTop(2f).row()
         infoButtons.clear()
         fun button(text: String, color: Color, f: () -> Unit) {
-            val b = TextButton(text, kit.buttonStyle(color))
+            val b = TextButton(text, kit.buttonStyle(color, font = kit.tool))
             b.addListener(changed(f))
-            infoButtons.add(b).height(50f).padRight(8f)
+            infoButtons.add(b).height(42f).padRight(8f)
         }
         button(Strings.ROTATE, Palette.cream) { listener.rotate(p) }
         if (p.kind.role == Role.SWITCH) button(if (p.closed) Strings.TOGGLE_ON else Strings.TOGGLE_OFF, Palette.turquoise) { listener.toggle(p) }
-        if (p.kind.role == Role.BATTERY && p.charge < 1.0) button("${Strings.REFILL} ${game.refillCost(p)}", Palette.turquoise) { listener.refill(p) }
+        if (refill > 0) button("${Strings.REFILL} $refill", Palette.turquoise) { listener.refill(p) }
         button("${Strings.SELL} +${game.refundFor(p)}", Palette.coral) { listener.sell(p) }
-        info.add(infoButtons).left().padTop(8f)
+        info.add(infoButtons).left().padTop(6f)
     }
 
     fun showEnd(won: Boolean, hasNext: Boolean) {
