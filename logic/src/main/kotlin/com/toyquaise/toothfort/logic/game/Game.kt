@@ -1,13 +1,16 @@
 package com.toyquaise.toothfort.logic.game
 
-import com.toyquaise.toothfort.logic.Cell
-import com.toyquaise.toothfort.logic.Dir
+import com.toyquaise.toothfort.logic.Geometry
+import com.toyquaise.toothfort.logic.Vec2
 import com.toyquaise.toothfort.logic.board.Attack
 import com.toyquaise.toothfort.logic.board.Board
 import com.toyquaise.toothfort.logic.board.BoardEvent
+import com.toyquaise.toothfort.logic.board.Junction
 import com.toyquaise.toothfort.logic.board.Part
 import com.toyquaise.toothfort.logic.board.PartKind
+import com.toyquaise.toothfort.logic.board.Port
 import com.toyquaise.toothfort.logic.board.Role
+import com.toyquaise.toothfort.logic.board.Wire
 import com.toyquaise.toothfort.logic.board.WireGauge
 import kotlin.math.ceil
 
@@ -49,7 +52,7 @@ sealed interface GameEvent {
  * current can be read, but batteries do not drain and nothing heats.
  */
 class Game(val level: Level) {
-    val board = Board(level.width, level.height, level::terrain)
+    val board = Board(level.width, level.height, level::blocked)
     val path: CandyPath get() = level.path
 
     var money = level.startMoney
@@ -79,18 +82,20 @@ class Game(val level: Level) {
     private var spawned = 0
     private var nextEnemyId = 1
     private val cooldown = HashMap<Part, Double>()
+    private val paid = HashMap<Wire, Int>()
 
     // ------------------------------------------------------------------ building
 
     fun unlocked(kind: PartKind) = kind in level.parts
     fun unlocked(gauge: WireGauge) = gauge in level.gauges
 
-    fun place(kind: PartKind, cell: Cell, facing: Dir = Dir.E): ActionResult {
+    /** Puts a part at [pos] turned to [angle] (snapping onto a nearby terminal, see [Board.placementFor]). */
+    fun place(kind: PartKind, pos: Vec2, angle: Double = 0.0): ActionResult {
         if (!unlocked(kind)) return ActionResult.LOCKED
         if (phase == Phase.WON || phase == Phase.LOST) return ActionResult.BLOCKED
-        if (!board.canPlace(cell)) return ActionResult.BLOCKED
+        if (!board.placementFor(pos, angle).ok) return ActionResult.BLOCKED
         if (money < kind.cost) return ActionResult.NO_MONEY
-        board.place(kind, cell, facing) ?: return ActionResult.BLOCKED
+        board.place(kind, pos, angle) ?: return ActionResult.BLOCKED
         money -= kind.cost
         return ActionResult.OK
     }
@@ -102,44 +107,73 @@ class Game(val level: Level) {
         return (if (phase == Phase.BUILD) value else value / 2).toInt()
     }
 
-    fun erase(cell: Cell): ActionResult {
-        val part = board.partAt(cell) ?: return ActionResult.NOTHING
-        money += refundFor(part)
-        board.remove(cell)
+    private fun refundFor(w: Wire): Int {
+        if (w.melted) return 0
+        val paid = paid[w] ?: 0
+        return if (phase == Phase.BUILD) paid else paid / 2
+    }
+
+    /** Takes a part away, with the wires on its terminals. */
+    fun erase(part: Part): ActionResult {
+        if (part !in board.parts) return ActionResult.NOTHING
+        val wires = board.wiresAt(Port.Terminal(part, true)) + board.wiresAt(Port.Terminal(part, false))
+        money += refundFor(part) + wires.sumOf { refundFor(it) }
+        wires.forEach { paid.remove(it) }
+        board.remove(part)
         cooldown.remove(part)
         beams.remove(part)
         return ActionResult.OK
     }
 
-    fun rotate(cell: Cell): ActionResult = if (board.rotate(cell)) ActionResult.OK else ActionResult.NOTHING
+    /** Turns a part by an eighth of a circle. */
+    fun rotate(part: Part, degrees: Double = 45.0): ActionResult = if (board.rotate(part, degrees)) ActionResult.OK else ActionResult.NOTHING
 
-    fun toggle(cell: Cell): ActionResult = if (board.toggleSwitch(cell)) ActionResult.OK else ActionResult.NOTHING
+    fun toggle(part: Part): ActionResult = if (board.toggleSwitch(part)) ActionResult.OK else ActionResult.NOTHING
 
-    fun wire(from: Cell, to: Cell, gauge: WireGauge): ActionResult {
+    /** What a wire from [a] to [b] through [via] would cost. */
+    fun wirePrice(a: Port, b: Port, via: List<Vec2>, gauge: WireGauge): Int =
+        gauge.cost(Geometry.length(listOf(board.position(a)) + via + listOf(board.position(b))))
+
+    fun wire(a: Port, b: Port, via: List<Vec2>, gauge: WireGauge): ActionResult {
         if (!unlocked(gauge)) return ActionResult.LOCKED
-        if (!board.canWire(from, to)) return ActionResult.BLOCKED
-        if (money < gauge.cost) return ActionResult.NO_MONEY
-        board.addWire(from, to, gauge) ?: return ActionResult.BLOCKED
-        money -= gauge.cost
+        if (!board.canWire(a, b)) return ActionResult.BLOCKED
+        val price = wirePrice(a, b, via, gauge)
+        if (money < price) return ActionResult.NO_MONEY
+        val w = board.addWire(a, b, via, gauge) ?: return ActionResult.BLOCKED
+        paid[w] = price
+        money -= price
         return ActionResult.OK
     }
 
-    fun unwire(from: Cell, to: Cell): ActionResult {
-        val w = board.removeWire(from, to) ?: return ActionResult.NOTHING
-        if (!w.melted) money += if (phase == Phase.BUILD) w.gauge.cost else w.gauge.cost / 2
+    fun unwire(w: Wire): ActionResult {
+        if (w !in board.wires) return ActionResult.NOTHING
+        money += refundFor(w)
+        paid.remove(w)
+        board.removeWire(w)
+        return ActionResult.OK
+    }
+
+    /** Clips are free: a place for wires to meet. */
+    fun addJunction(pos: Vec2): Junction? = board.addJunction(pos)
+
+    fun eraseJunction(j: Junction): ActionResult {
+        if (j !in board.junctions) return ActionResult.NOTHING
+        val wires = board.wiresAt(Port.Clip(j))
+        money += wires.sumOf { refundFor(it) }
+        wires.forEach { paid.remove(it) }
+        board.removeJunction(j)
         return ActionResult.OK
     }
 
     /** What a fresh battery costs in place of this one. */
     fun refillCost(part: Part): Int = maxOf(1, ceil(part.kind.cost * (1.0 - part.charge)).toInt())
 
-    fun refill(cell: Cell): ActionResult {
-        val part = board.partAt(cell) ?: return ActionResult.NOTHING
+    fun refill(part: Part): ActionResult {
         if (part.kind.role != Role.BATTERY || part.charge >= 1.0) return ActionResult.NOTHING
         val cost = refillCost(part)
         if (money < cost) return ActionResult.NO_MONEY
         money -= cost
-        board.refill(cell)
+        board.refill(part)
         return ActionResult.OK
     }
 
@@ -211,27 +245,26 @@ class Game(val level: Level) {
         }
     }
 
-    /** The candy furthest along the road within [range] cells of [cell]. */
-    private fun target(cell: Cell, range: Double): Enemy? {
-        val c = Vec2.center(cell)
+    /** The candy furthest along the trail within [range] of [c]. */
+    fun target(c: Vec2, range: Double): Enemy? {
         return enemies.filter { it.alive && path.at(it.distance).distanceTo(c) <= range }.maxByOrNull { it.distance }
     }
 
     private fun runMachines(dt: Double) {
         beams.clear()
-        for (p in board.allParts) {
+        for (p in board.parts) {
             val spec = p.kind.machine ?: continue
             if (p.broken || p.performance <= 0.0) continue
             val left = (cooldown[p] ?: 0.0) - dt
             cooldown[p] = maxOf(left, 0.0)
-            val t = target(p.cell, spec.range) ?: continue
+            val t = target(p.pos, spec.range) ?: continue
             when (spec.attack) {
                 Attack.SCRUB -> if (left <= 0.0) {
                     damage(t, spec.damage, p)
                     cooldown[p] = spec.interval / p.performance
                 }
                 Attack.BLOB -> if (left <= 0.0) {
-                    blobs += Blob(p, t, Vec2.center(p.cell), spec.damage, spec.splash)
+                    blobs += Blob(p, t, p.pos, spec.damage, spec.splash)
                     events += GameEvent.Shot(p)
                     cooldown[p] = spec.interval / p.performance
                 }

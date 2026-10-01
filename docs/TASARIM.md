@@ -3,6 +3,17 @@
 İngilizce adı **Tooth Fort**. Toyquaise'in öğretici oyunlarından biri: şekerler dişe saldırır, oyuncu
 diş macunu makineleriyle dişi korur. Makineler elektrikle çalışır ve elektrik gerçekten hesaplanır.
 
+## Sahne: mutfak tezgâhı
+
+Savaş bir mutfak tezgâhında geçer. Devrilmiş şeker kavanozundan çıkan şekerler tezgâha dökülmüş
+pembe şurup izini takip ederek peçetenin üstünde duran dişe yürür. Tezgâhta kesme tahtası,
+kakaolu kupa, kurabiyeli tabak, meyve kâsesi, oklava, tuzluk gibi mutfak eşyaları vardır. Bunların
+üstüne makine konmaz, ama kablolar üstlerinden aşabilir. Arkadaki fayanslı duvarda bir priz durur;
+şebeke elektriği ve transformatör ileride oradan gelecek.
+
+Mutfak, sonraki fikirlere de yer açar: lavabonun suyu ve dökülen kola iletkendir (kısa devre),
+mutfak aletleri (mikser, tost makinesi) yeni makineler olabilir.
+
 ## Neden bu fikir
 
 - Şekerle diş macununun çatışmasını herkes anında anlar. Konunun diş sağlığıyla doğal bir bağı
@@ -23,7 +34,7 @@ Her makinenin bir çalışma gerilimi var: diş fırçası 3 V, macun topu 6 V, 
   (+ ile −) konunca birbirine değer ve seri bağlanır.
 - **Paralel bağlarsan** gerilim aynı kalır ama piller daha uzun dayanır. Uzun bölümlerde bu
   önemli.
-- **İnce kablo** her karede gerilim kaybettirir ve çok akımda erir. **Kalın kablo** daha
+- **İnce kablo** her karışta gerilim kaybettirir ve çok akımda erir. **Kalın kablo** daha
   pahalıdır. Oyun boyunca karar hep aynı: bütçe mi, güç mü, menzil mi?
 
 ### Uyarı 1: elektrik bir para birimine dönüşmemeli
@@ -32,7 +43,7 @@ Arkada küçük bir devre çözücü var (`logic/.../circuit/Network.kt`). Kirch
 düğümde bir denklem verir. Denklemler düğüm analiziyle (G·v = i) ve Gauss eliminasyonuyla çözülür.
 
 - Pil, iç direnci olan bir gerilim kaynağıdır (0,25 Ω). Kısa devrede akım büyür ama sonludur.
-- Kablo, kare başına bir dirençtir (ince 0,12 Ω, kalın 0,03 Ω).
+- Kablo, uzunluğuyla orantılı bir dirençtir (karış başına ince 0,12 Ω, kalın 0,03 Ω).
 - Makine, değeri anma gerilim ve gücünden gelen bir dirençtir.
 - Anahtar ve sigorta çok küçük dirençlerdir; açılınca ya da atınca devreden çıkarlar.
 
@@ -41,14 +52,25 @@ kararlardır. Ölçüm etiketleri her makinenin üstünde gerçek gerilimi göst
 
 ### Uyarı 2: telefonda kablo çekmek zahmetli olabilir
 
-Kablolar ızgaraya oturur ve parmakla tek hareketle çekilir: kablo aracını seçip kareler üzerinde
-sürüklemek yeter. Parmak kare atlarsa aradaki kareler kendiliğinden doldurulur. Kablolar şeker
-yolunun üstünden geçebilir (ileride kola ve sakız bunu tehlikeli kılacak). Bir karede buluşan
-kablolar birleşir.
+Izgara yoktur; her şey serbesttir ve parmakla yapılır.
 
-Her parçanın iki ucu vardır: + bir yanda, − karşı yanda. Kablo bir parçaya yalnızca bu iki
-yandan bağlanır. Seçili parçaya yeniden dokunmak parçayı döndürür. Makinelerin uçları sarıdır
-(kutupsuzdur); pilin + ucu mercan, − ucu kömür rengidir.
+- **Parça koymak:** Kutudan parçayı seçip tezgâha dokun. Parmağını kaldırana kadar parça
+  parmağının altında süzülür. Konabilecek yerde yeşil, konamayacak yerde (şurup izi, mutfak
+  eşyası, başka bir parça) kırmızı bir halka görünür.
+- **Döndürmek:** Seçili parçanın kartındaki Döndür düğmesi parçayı sekizde bir tur çevirir.
+- **Seri bağlamak:** Bir pili ötekinin ucuna yaklaştırınca uçları birbirine yapışır ve aynı
+  doğrultuya dizilir. Hangi ucun yapışacağını oyuncu seçer: + ile − yapışırsa gerilimler toplanır,
+  + ile + yapışırsa birbirini götürür.
+- **Kablo çekmek:** Kablo aracıyla bir parçanın + ya da − ucuna dokun, parmağını sürükle, başka
+  bir ucun üstünde bırak. Kablo, parmağın çizdiği yoldan geçen yumuşak bir hamur rulosu olur.
+  Boş bir yerde bırakırsan oraya bir **klips** konur; birden çok kablo klipste birleşir.
+- **Uzunluk önemlidir:** Kablonun direnci ve fiyatı uzunluğuyla orantılıdır (birimi "karış",
+  aşağı yukarı bir makine eni). Uzun, dolambaçlı kablo gerilim kaybettirir.
+- **Silmek:** Sil aracıyla bir parçaya, klipse ya da kablonun üstüne dokunmak yeter. Bir parça
+  silinince uçlarındaki kablolar da gider.
+
+Her parçanın iki ucu vardır: + bir yanda, − karşı yanda. Kablo parçaya yalnızca bu uçlardan
+bağlanır. Makinelerin uçları sarıdır (kutupsuzdur); pilin + ucu mercan, − ucu kömür rengidir.
 
 ## Bölüm geçtikçe açılanlar
 
@@ -99,6 +121,13 @@ Görsel dil toyquaise.com'dan gelir: nane yeşili masada oyun hamuru.
 - **Renkler:** sitenin hamur renkleri (`art/scenes.mjs` içindeki `clayColors`). Turkuaz, petrol,
   sarı, mercan, pembe, mor, krem, kömür.
 - **Yazı:** başlık ve düğmelerde DynaPuff, metinde Lexend (okuma akıcılığı için tasarlandı).
+- **Yoğrulmuş modeller:** her şekil ince bölünür, sonra el yapımı gibi yoğrulur: yüzey yavaş
+  bir gürültüyle içeri dışarı itilir, rastgele yerlere başparmak izi bastırılır. Işık her yumruyu
+  ve çukuru görsün diye normaller de buna göre eğilir.
+- **Mıncıklama:** her şey hamur gibi ezilip yaylanır. Konan parça yere düşen bir hamur topu gibi
+  yayvanlaşıp toparlanır. Parmağın bastığı parça ezilir, bırakınca zıplar. Vurulan şeker
+  sarsılır, ateş eden top geri teper, ısırılan diş titrer. Hacim korunur: aşağı ezilen yanlara
+  taşar.
 - **Hamur gölgelendiricisi:** sitenin SVG "clay" filtresinin 3D karşılığıdır.
   - Gürültüyle hafifçe bozulmuş yüzeyler.
   - Geniş, yumuşak, mat ışık ve düşük, geniş bir parlama.

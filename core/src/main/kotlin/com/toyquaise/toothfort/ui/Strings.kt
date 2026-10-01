@@ -59,15 +59,18 @@ object Strings {
     const val ALL_DONE = "Şimdilik bütün bölümler bu kadar."
 
     const val NO_MONEY = "Yeterli para yok."
-    const val BLOCKED_PART = "Buraya konmaz: yol ya da dolu bir kare."
-    const val BLOCKED_WIRE = "Kablo bir parçaya yalnızca + ya da − ucundan bağlanır."
+    const val BLOCKED_PART = "Buraya konmaz: şurup izi, bir mutfak eşyası ya da başka bir parça var."
+    const val START_WIRE = "Kabloyu bir parçanın + ya da − ucundan (ya da bir klipsten) başlat."
     const val LOCKED = "Bu parça sonraki bölümlerde açılır."
-    const val TAP_TO_ROTATE = "Parçayı döndürmek için yeniden dokun."
+    const val TAP_TO_ROTATE = "Döndürmek için karttaki Döndür'e dokun. Pilleri uç uca yaklaştırırsan yapışırlar."
+
+    /** Wire is sold by the span ("karış"), about one machine wide. */
+    fun wireCost(perUnit: Int) = "$perUnit/karış"
 
     fun hint(level: Int) = when (level) {
-        1 -> "Pilin + ucundan fırçaya, fırçanın öbür ucundan pilin − ucuna kablo çek. Devre kapanınca fırça çalışır."
-        2 -> "Macun topu 6 V ister. İki pili uç uca (+ ile −) dizersen gerilimler toplanır: seri bağlantı. Yan yana bağlarsan gerilim aynı kalır ama piller daha uzun dayanır: paralel."
-        3 -> "Uzaktaki makinelere kalın kablo çek: ince kablo gerilim kaybettirir, çok akımda erir. Lazer 12 V ister: dört pil seri."
+        1 -> "Pili ve fırçayı tezgâha koy. Kablo aracıyla parmağını pilin + ucundan fırçaya, fırçanın öbür ucundan pilin − ucuna sürükle. Devre kapanınca fırça çalışır."
+        2 -> "Macun topu 6 V ister. Bir pili ötekinin ucuna yaklaştır: + ile − yapışır, gerilimler toplanır (seri). Kabloyla yan yana bağlarsan gerilim aynı kalır ama piller uzun dayanır (paralel)."
+        3 -> "Uzun kablo gerilim kaybettirir: uzaktaki makinelere kalın kablo çek. Lazer 12 V ister: dört pil uç uca."
         else -> ""
     }
 

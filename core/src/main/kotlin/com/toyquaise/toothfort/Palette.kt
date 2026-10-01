@@ -35,6 +35,15 @@ object Palette {
     val boardLip = hex("2e9e90")
     val boardDot = hex("45b7a4")
     val meterOk = hex("8ee8d6")
+
+    // The kitchen.
+    val woodLight = hex("e9c48f")
+    val woodDark = hex("b07c4b")
+    val tileWall = hex("dff1ec")
+    val carrot = hex("f08a2c")
+    val leaf = hex("5fb85a")
+    val syrup = hex("f07aa8")
+    val syrupLight = hex("f9b6cf")
     val tray = hex("3fb0a1")
     val gum = hex("f39cbe")
     val gumDark = hex("e67fa9")

@@ -1,79 +1,52 @@
 package com.toyquaise.toothfort.logic.game
 
-import com.toyquaise.toothfort.logic.Cell
+import com.toyquaise.toothfort.logic.Geometry
+import com.toyquaise.toothfort.logic.Vec2
+import com.toyquaise.toothfort.logic.board.Layout
 import com.toyquaise.toothfort.logic.board.PartKind
-import com.toyquaise.toothfort.logic.board.Terrain
 import com.toyquaise.toothfort.logic.board.WireGauge
-import kotlin.math.hypot
-import kotlin.math.sign
-
-/** A point on the board in cell units; the centre of cell (x, y) is (x + 0.5, y + 0.5). */
-data class Vec2(val x: Double, val y: Double) {
-    operator fun plus(o: Vec2) = Vec2(x + o.x, y + o.y)
-    operator fun minus(o: Vec2) = Vec2(x - o.x, y - o.y)
-    operator fun times(s: Double) = Vec2(x * s, y * s)
-    fun length() = hypot(x, y)
-    fun distanceTo(o: Vec2) = hypot(x - o.x, y - o.y)
-
-    companion object {
-        fun center(c: Cell) = Vec2(c.x + 0.5, c.y + 0.5)
-    }
-}
 
 /**
- * The road the candies walk, through straight runs between [waypoints] (each run along a row or
- * a column). They enter one cell before the first waypoint and stop on the last one, the tooth.
+ * The trail of spilt syrup the candies follow across the counter: a smooth curve through
+ * [control] points, from the tipped-over candy jar to the tooth.
  */
-class CandyPath(val waypoints: List<Cell>) {
-    /** Every cell the road covers, in walking order, the tooth's cell last. */
-    val cells: List<Cell>
-    private val points: List<Vec2>
-    private val cumulative: DoubleArray
+class CandyPath(val control: List<Vec2>) {
+    val points: List<Vec2> = Geometry.smooth(control, 0.08)
+    private val cumulative = DoubleArray(points.size)
     val length: Double
 
     init {
-        require(waypoints.size >= 2)
-        val list = ArrayList<Cell>()
-        list += waypoints[0]
-        for (i in 1 until waypoints.size) {
-            val a = waypoints[i - 1]
-            val b = waypoints[i]
-            require(a.x == b.x || a.y == b.y) { "path runs must be straight: $a -> $b" }
-            val dx = (b.x - a.x).sign
-            val dy = (b.y - a.y).sign
-            var c = a
-            while (c != b) {
-                c = Cell(c.x + dx, c.y + dy)
-                list += c
-            }
-        }
-        cells = list
-        val first = waypoints[0]
-        val second = cells[1]
-        val entry = Cell(first.x - (second.x - first.x), first.y - (second.y - first.y))
-        points = listOf(Vec2.center(entry)) + waypoints.map(Vec2::center)
-        cumulative = DoubleArray(points.size)
+        require(control.size >= 2)
         for (i in 1 until points.size) cumulative[i] = cumulative[i - 1] + points[i].distanceTo(points[i - 1])
         length = cumulative.last()
     }
 
-    /** The point [distance] cells along the road. */
+    val start: Vec2 get() = points.first()
+    val end: Vec2 get() = points.last()
+
+    /** The point [distance] units along the trail. */
     fun at(distance: Double): Vec2 {
         val d = distance.coerceIn(0.0, length)
-        var i = 1
-        while (i < points.size - 1 && cumulative[i] < d) i++
-        val t = (d - cumulative[i - 1]) / (cumulative[i] - cumulative[i - 1])
+        var lo = 1
+        var hi = points.size - 1
+        while (lo < hi) {
+            val mid = (lo + hi) / 2
+            if (cumulative[mid] < d) lo = mid + 1 else hi = mid
+        }
+        val i = lo
+        val span = cumulative[i] - cumulative[i - 1]
+        val t = if (span < 1e-12) 0.0 else (d - cumulative[i - 1]) / span
         return points[i - 1] + (points[i] - points[i - 1]) * t
     }
 
-    /** The walking direction at [distance] (a unit vector along the current run). */
+    /** The walking direction at [distance] (a unit vector). */
     fun heading(distance: Double): Vec2 {
-        val a = at(distance)
+        val a = at(maxOf(0.0, distance - 0.05))
         val b = at(minOf(length, distance + 0.05))
-        val d = b - a
-        val len = d.length()
-        return if (len < 1e-9) Vec2(0.0, 1.0) else d * (1.0 / len)
+        return (b - a).normalized()
     }
+
+    fun distanceTo(p: Vec2): Double = Geometry.distanceToPolyline(p, points)
 }
 
 enum class EnemyKind(val health: Double, val speed: Double, val reward: Int, val bite: Int) {
@@ -91,6 +64,29 @@ class Wave(val groups: List<SpawnGroup>) {
         groups.flatMap { g -> (0 until g.count).map { g.delay + it * g.interval to g.kind } }.sortedBy { it.first }
 }
 
+/**
+ * Kitchen things on the counter. Nothing can be built on them; wires may run over them.
+ * [footprint] is a set of circles (offset along and across the prop's axis, radius).
+ */
+enum class PropKind(val footprint: List<Triple<Double, Double, Double>>) {
+    CUTTING_BOARD(listOf(Triple(-0.36, 0.0, 0.52), Triple(0.36, 0.0, 0.52))),
+    PLATE(listOf(Triple(0.0, 0.0, 0.58))),
+    MUG(listOf(Triple(0.0, 0.0, 0.36))),
+    FRUIT_BOWL(listOf(Triple(0.0, 0.0, 0.55))),
+    ROLLING_PIN(listOf(Triple(-0.6, 0.0, 0.2), Triple(-0.2, 0.0, 0.2), Triple(0.2, 0.0, 0.2), Triple(0.6, 0.0, 0.2))),
+    SALT_SHAKER(listOf(Triple(0.0, 0.0, 0.2))),
+}
+
+class Prop(val kind: PropKind, val pos: Vec2, val angle: Double = 0.0) {
+    /** The footprint circles on the counter: centre and radius. */
+    val circles: List<Pair<Vec2, Double>> by lazy {
+        val along = Vec2.ofAngle(angle)
+        val across = Vec2(-along.y, along.x)
+        kind.footprint.map { (a, c, r) -> pos + along * a + across * c to r }
+    }
+}
+
+/** A kitchen scene: the counter, its props, the syrup trail, what the player may build, and the waves. */
 class Level(
     val number: Int,
     val path: CandyPath,
@@ -99,33 +95,47 @@ class Level(
     val parts: Set<PartKind>,
     val gauges: Set<WireGauge>,
     val waves: List<Wave>,
-    val width: Int = 6,
-    val height: Int = 9,
+    val props: List<Prop> = emptyList(),
+    val width: Double = 6.0,
+    val height: Double = 9.0,
 ) {
-    val tooth: Cell get() = path.cells.last()
-    private val pathCells = path.cells.toHashSet()
+    val tooth: Vec2 get() = path.end
+    val jar: Vec2 get() = path.start
 
-    fun terrain(c: Cell): Terrain = when (c) {
-        tooth -> Terrain.TOOTH
-        in pathCells -> Terrain.PATH
-        else -> Terrain.GROUND
+    /** Whether a round footprint of radius [r] at [p] would hit the trail, a prop, the jar or the tooth. */
+    fun blocked(p: Vec2, r: Double): Boolean {
+        if (path.distanceTo(p) < Layout.PATH_HALF_WIDTH + r * 0.8) return true
+        if (p.distanceTo(tooth) < TOOTH_RADIUS + r) return true
+        if (p.distanceTo(jar) < JAR_RADIUS + r) return true
+        return props.any { prop -> prop.circles.any { (c, cr) -> p.distanceTo(c) < cr + r } }
+    }
+
+    companion object {
+        const val TOOTH_RADIUS = 0.72
+        const val JAR_RADIUS = 0.55
     }
 }
 
 object Levels {
+    private fun v(x: Double, y: Double) = Vec2(x, y)
     private fun wave(vararg groups: SpawnGroup) = Wave(groups.toList())
     private fun cubes(n: Int, every: Double, delay: Double = 0.0) = SpawnGroup(EnemyKind.SUGAR_CUBE, n, every, delay)
     private fun bears(n: Int, every: Double, delay: Double = 0.0) = SpawnGroup(EnemyKind.GUMMY_BEAR, n, every, delay)
     private fun lollipop(delay: Double) = SpawnGroup(EnemyKind.LOLLIPOP, 1, 1.0, delay)
 
-    /** Level 1: a battery, a wire and the first brush. A simple circuit. */
+    /** Level 1, the counter by the cutting board: a battery, a wire and the first brush. */
     val first = Level(
         number = 1,
-        path = CandyPath(listOf(Cell(1, 0), Cell(1, 2), Cell(4, 2), Cell(4, 5), Cell(1, 5), Cell(1, 7), Cell(3, 7), Cell(3, 8))),
+        path = CandyPath(listOf(v(1.0, 0.5), v(1.2, 1.8), v(2.6, 2.6), v(4.3, 2.5), v(4.9, 3.9), v(3.9, 5.0), v(2.0, 5.2), v(1.3, 6.4), v(2.2, 7.6), v(3.8, 8.0))),
         startMoney = 70,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH),
         gauges = setOf(WireGauge.THIN),
+        props = listOf(
+            Prop(PropKind.CUTTING_BOARD, v(4.3, 0.9), 8.0),
+            Prop(PropKind.MUG, v(0.6, 3.7)),
+            Prop(PropKind.PLATE, v(5.0, 6.7)),
+        ),
         waves = listOf(
             wave(cubes(6, 1.6)),
             wave(cubes(10, 1.2)),
@@ -135,14 +145,20 @@ object Levels {
         ),
     )
 
-    /** Level 2: the 6 V paste ball. Batteries in series for voltage, in parallel to last longer. */
+    /** Level 2, breakfast: the 6 V paste ball. Batteries in series for voltage, in parallel to last. */
     val second = Level(
         number = 2,
-        path = CandyPath(listOf(Cell(4, 0), Cell(4, 1), Cell(1, 1), Cell(1, 4), Cell(4, 4), Cell(4, 6), Cell(2, 6), Cell(2, 8))),
+        path = CandyPath(listOf(v(5.0, 0.5), v(4.6, 1.8), v(2.8, 1.6), v(1.0, 2.4), v(1.2, 4.0), v(3.0, 4.4), v(4.8, 5.0), v(4.6, 6.6), v(2.6, 6.9), v(1.6, 8.0))),
         startMoney = 120,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH, PartKind.PASTE_CANNON),
         gauges = setOf(WireGauge.THIN),
+        props = listOf(
+            Prop(PropKind.ROLLING_PIN, v(1.9, 0.6), -8.0),
+            Prop(PropKind.FRUIT_BOWL, v(5.3, 3.2)),
+            Prop(PropKind.MUG, v(0.6, 6.0)),
+            Prop(PropKind.SALT_SHAKER, v(3.9, 8.4)),
+        ),
         waves = listOf(
             wave(cubes(12, 1.0)),
             wave(bears(6, 2.0)),
@@ -153,14 +169,20 @@ object Levels {
         ),
     )
 
-    /** Level 3: thick wire for the far side, switches to save batteries, and the 12 V laser. */
+    /** Level 3, by the window: thick wire for the far side, switches, and the 12 V laser. */
     val third = Level(
         number = 3,
-        path = CandyPath(listOf(Cell(0, 1), Cell(4, 1), Cell(4, 3), Cell(1, 3), Cell(1, 6), Cell(4, 6), Cell(4, 8))),
+        path = CandyPath(listOf(v(0.5, 1.0), v(2.0, 1.5), v(3.8, 1.0), v(5.0, 2.1), v(4.2, 3.6), v(2.2, 3.5), v(1.0, 4.9), v(2.0, 6.4), v(4.0, 6.2), v(4.6, 7.9))),
         startMoney = 200,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH, PartKind.PASTE_CANNON, PartKind.LASER, PartKind.SWITCH),
         gauges = setOf(WireGauge.THIN, WireGauge.THICK),
+        props = listOf(
+            Prop(PropKind.PLATE, v(1.3, 8.0)),
+            Prop(PropKind.MUG, v(5.4, 5.0)),
+            Prop(PropKind.SALT_SHAKER, v(0.4, 2.8)),
+            Prop(PropKind.ROLLING_PIN, v(3.0, 5.0), 4.0),
+        ),
         waves = listOf(
             wave(cubes(14, 0.8)),
             wave(bears(10, 1.4)),

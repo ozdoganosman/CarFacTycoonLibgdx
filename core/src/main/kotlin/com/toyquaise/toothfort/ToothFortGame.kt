@@ -24,6 +24,12 @@ class Options(
     val closeUp: Pair<Int, Int>? = null,
     /** Draw only the 3D board (for screenshots of the models). */
     val hideHud: Boolean = false,
+    /**
+     * Scripted touches for checking the controls, one step per frame, separated by ";":
+     * "tool battery|brush|cannon|laser|switch|wire|thick|erase", "down x y", "move x y", "up x y"
+     * (counter units), "wait n" (frames), "shot" (take the screenshot now).
+     */
+    val script: String? = null,
 )
 
 class ToothFortGame(val options: Options = Options()) : Game() {
@@ -39,6 +45,9 @@ class ToothFortGame(val options: Options = Options()) : Game() {
 
     private var frames = 0
 
+    /** Set by the play screen when a script asks for the screenshot. */
+    var shotNow = false
+
     override fun create() {
         renderer = ClayRenderer()
         models = Models()
@@ -53,7 +62,7 @@ class ToothFortGame(val options: Options = Options()) : Game() {
         val next = PlayScreen(this, index.coerceIn(0, Levels.all.lastIndex))
         setScreen(next)
         old?.dispose()
-        if (options.demo) Demo.build(next.game, options.seconds)?.let(next::selectAt)
+        if (options.demo) Demo.build(next.game, options.seconds)?.let(next::select)
     }
 
     override fun render() {
@@ -61,7 +70,9 @@ class ToothFortGame(val options: Options = Options()) : Game() {
         val path = options.screenshot ?: return
         frames++
         // A few frames for the view to settle, then save what is on screen.
-        if (frames == 20) {
+        val due = if (options.script != null) shotNow else frames == 20
+        if (due) {
+            shotNow = false
             val w = Gdx.graphics.backBufferWidth
             val h = Gdx.graphics.backBufferHeight
             val pm = Pixmap.createFromFrameBuffer(0, 0, w, h)

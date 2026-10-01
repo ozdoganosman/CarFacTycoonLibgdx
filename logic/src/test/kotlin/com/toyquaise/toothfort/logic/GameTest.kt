@@ -1,7 +1,9 @@
 package com.toyquaise.toothfort.logic
 
+import com.toyquaise.toothfort.logic.board.Layout
+import com.toyquaise.toothfort.logic.board.Part
 import com.toyquaise.toothfort.logic.board.PartKind
-import com.toyquaise.toothfort.logic.board.Terrain
+import com.toyquaise.toothfort.logic.board.Port
 import com.toyquaise.toothfort.logic.board.WireGauge
 import com.toyquaise.toothfort.logic.game.ActionResult
 import com.toyquaise.toothfort.logic.game.CandyPath
@@ -17,32 +19,35 @@ import org.junit.jupiter.api.Assertions.assertTrue
 import org.junit.jupiter.api.Test
 
 class GameTest {
-    private fun c(x: Int, y: Int) = Cell(x, y)
+    private fun v(x: Double, y: Double) = Vec2(x, y)
     private val dt = 1.0 / 60
+    private val Part.plus get() = Port.Terminal(this, true)
+    private val Part.minus get() = Port.Terminal(this, false)
 
-    /** A straight road along row 2 to a tooth at (7,2); six sugar cubes. */
+    /** A straight trail along y = 2.5 to a tooth at (8, 2.5); six sugar cubes. */
     private fun straight(money: Int = 200) = Level(
         number = 0,
-        path = CandyPath(listOf(c(0, 2), c(7, 2))),
+        path = CandyPath(listOf(v(0.0, 2.5), v(8.0, 2.5))),
         startMoney = money,
         toothHealth = 20,
         parts = setOf(PartKind.BATTERY, PartKind.BRUSH),
         gauges = setOf(WireGauge.THIN),
         waves = listOf(Wave(listOf(SpawnGroup(EnemyKind.SUGAR_CUBE, 6, 1.5))), Wave(listOf(SpawnGroup(EnemyKind.SUGAR_CUBE, 2, 1.0)))),
-        width = 8,
-        height = 5,
+        width = 9.0,
+        height = 5.0,
     )
 
-    private fun Game.route(vararg cells: Cell) {
-        for (i in 1 until cells.size) assertEquals(ActionResult.OK, wire(cells[i - 1], cells[i], WireGauge.THIN), "${cells[i - 1]} -> ${cells[i]}")
+    private fun Game.part(kind: PartKind, x: Double, y: Double): Part {
+        assertEquals(ActionResult.OK, place(kind, v(x, y), 0.0), "$kind at ($x, $y)")
+        return board.parts.last()
     }
 
-    /** A battery-and-brush loop in the 3×2 block whose top-left corner is (x,0), above the road. */
-    private fun Game.brushLoop(x: Int) {
-        assertEquals(ActionResult.OK, place(PartKind.BATTERY, c(x + 1, 0), Dir.E))
-        assertEquals(ActionResult.OK, place(PartKind.BRUSH, c(x + 1, 1), Dir.E))
-        route(c(x + 1, 0), c(x + 2, 0), c(x + 2, 1), c(x + 1, 1))
-        route(c(x + 1, 1), c(x, 1), c(x, 0), c(x + 1, 0))
+    /** A battery and a brush above the trail at x, wired in a loop. */
+    private fun Game.brushLoop(x: Double) {
+        val battery = part(PartKind.BATTERY, x, 0.5)
+        val brush = part(PartKind.BRUSH, x, 1.5)
+        assertEquals(ActionResult.OK, wire(battery.plus, brush.plus, listOf(v(x + 0.8, 0.5), v(x + 0.8, 1.5)), WireGauge.THIN))
+        assertEquals(ActionResult.OK, wire(brush.minus, battery.minus, listOf(v(x - 0.8, 1.5), v(x - 0.8, 0.5)), WireGauge.THIN))
     }
 
     private fun Game.playWave(maxSeconds: Double = 120.0) {
@@ -61,10 +66,10 @@ class GameTest {
     }
 
     @Test
-    fun `powered brushes clean the road and earn money`() {
+    fun `powered brushes clean the trail and earn money`() {
         val g = Game(straight())
-        g.brushLoop(2)
-        g.brushLoop(5)
+        g.brushLoop(2.5)
+        g.brushLoop(5.5)
         val before = g.money
         g.playWave()
         assertEquals(20, g.toothHealth)
@@ -74,63 +79,81 @@ class GameTest {
     @Test
     fun `a brush without a closed circuit does nothing`() {
         val g = Game(straight())
-        g.place(PartKind.BATTERY, c(3, 0), Dir.E)
-        g.place(PartKind.BRUSH, c(3, 1), Dir.E)
-        g.route(c(3, 0), c(4, 0), c(4, 1), c(3, 1)) // the return wire is missing
+        val battery = g.part(PartKind.BATTERY, 3.0, 0.5)
+        val brush = g.part(PartKind.BRUSH, 3.0, 1.5)
+        g.wire(battery.plus, brush.plus, listOf(v(3.8, 0.5), v(3.8, 1.5)), WireGauge.THIN) // no return wire
         g.playWave()
         assertEquals(20 - 6, g.toothHealth)
     }
 
     @Test
-    fun `parts go on the ground only, cost money and are locked until their level`() {
-        val g = Game(Levels.first)
-        val road = g.path.cells[2]
-        assertEquals(Terrain.PATH, g.board.terrain(road))
-        assertEquals(ActionResult.BLOCKED, g.place(PartKind.BRUSH, road))
-        assertEquals(ActionResult.LOCKED, g.place(PartKind.PASTE_CANNON, c(4, 0)))
+    fun `wire is sold by length and building is free to undo`() {
+        val g = Game(straight())
         val money = g.money
-        assertEquals(ActionResult.OK, g.place(PartKind.BRUSH, c(4, 0)))
-        assertEquals(money - PartKind.BRUSH.cost, g.money)
-        // Building is free to undo: everything comes back while no wave runs.
-        assertEquals(ActionResult.OK, g.erase(c(4, 0)))
+        val battery = g.part(PartKind.BATTERY, 3.0, 0.5)
+        val brush = g.part(PartKind.BRUSH, 6.0, 0.5)
+        val price = g.wirePrice(battery.plus, brush.minus, emptyList(), WireGauge.THIN)
+        assertEquals(3, price) // 2.16 units of thin wire
+        assertEquals(ActionResult.OK, g.wire(battery.plus, brush.minus, emptyList(), WireGauge.THIN))
+        assertEquals(money - 10 - 15 - 3, g.money)
+        // Taking the battery away takes its wire too, and everything comes back while no wave runs.
+        g.erase(battery)
+        g.erase(brush)
         assertEquals(money, g.money)
+        assertTrue(g.board.wires.isEmpty())
     }
 
     @Test
-    fun `wires may cross the road but not the tooth`() {
-        val g = Game(straight())
-        assertEquals(ActionResult.OK, g.wire(c(3, 1), c(3, 2), WireGauge.THIN))
-        assertEquals(ActionResult.BLOCKED, g.wire(c(6, 2), c(7, 2), WireGauge.THIN))
+    fun `parts stay off the trail and out of locked levels`() {
+        val g = Game(Levels.first)
+        val onTrail = g.path.at(3.0)
+        assertEquals(ActionResult.BLOCKED, g.place(PartKind.BRUSH, onTrail))
+        assertEquals(ActionResult.LOCKED, g.place(PartKind.PASTE_CANNON, v(3.0, 4.0)))
     }
 
     @Test
     fun `batteries only drain while a wave runs`() {
         val g = Game(straight())
-        g.brushLoop(2)
+        g.brushLoop(2.5)
+        val battery = g.board.parts.first()
         repeat(600) { g.step(dt) }
-        assertEquals(1.0, g.board.partAt(c(3, 0))!!.charge)
+        assertEquals(1.0, battery.charge)
         g.playWave()
-        assertTrue(g.board.partAt(c(3, 0))!!.charge < 1.0)
+        assertTrue(battery.charge < 1.0)
     }
 
     @Test
     fun `clearing the last wave wins the level`() {
         val g = Game(straight())
-        g.brushLoop(2)
-        g.brushLoop(5)
+        g.brushLoop(2.5)
+        g.brushLoop(5.5)
         g.playWave()
         g.playWave()
         assertEquals(Phase.WON, g.phase)
     }
 
     @Test
-    fun `every level's road reaches its tooth and leaves room to build`() {
+    fun `every kitchen keeps its props off the trail and leaves room to build`() {
         for (level in Levels.all) {
             val g = Game(level)
-            assertEquals(Terrain.TOOTH, g.board.terrain(level.tooth))
-            assertTrue(level.path.cells.all { it.x in 0 until level.width && it.y in 0 until level.height }, "level ${level.number}")
-            val ground = (0 until level.width).sumOf { x -> (0 until level.height).count { y -> g.board.terrain(c(x, y)) == Terrain.GROUND } }
-            assertTrue(ground > level.width * level.height / 2, "level ${level.number} has $ground free cells")
+            assertTrue(level.path.points.all { g.board.inside(it) }, "level ${level.number}: trail on the counter")
+            for (prop in level.props) for ((c, r) in prop.circles) {
+                assertTrue(level.path.distanceTo(c) >= Layout.PATH_HALF_WIDTH + r - 0.05, "level ${level.number}: ${prop.kind} on the trail")
+                assertTrue(g.board.inside(c), "level ${level.number}: ${prop.kind} off the counter")
+            }
+            var free = 0
+            var all = 0
+            var y = 0.25
+            while (y < level.height) {
+                var x = 0.25
+                while (x < level.width) {
+                    all++
+                    if (g.board.canStand(v(x, y))) free++
+                    x += 0.25
+                }
+                y += 0.25
+            }
+            assertTrue(free > all / 5, "level ${level.number}: only $free of $all spots free")
         }
     }
 }

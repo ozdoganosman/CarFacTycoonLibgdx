@@ -142,7 +142,7 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
         toolGroup.clear()
         toolButtons.clear()
         for (kind in PartKind.entries) if (game.unlocked(kind)) addTool(Tool.Place(kind), Strings.part(kind), "${kind.cost}")
-        for (g in WireGauge.entries) if (game.unlocked(g)) addTool(Tool.Wiring(g), Strings.wire(g), "${g.cost}/kare")
+        for (g in WireGauge.entries) if (game.unlocked(g)) addTool(Tool.Wiring(g), Strings.wire(g), Strings.wireCost(g.costPerUnit.toInt()))
         addTool(Tool.Erase, Strings.ERASE, "")
         val hint = Strings.hint(game.level.number)
         if (hint.isNotEmpty()) showToast(hint, 9f)
@@ -160,6 +160,12 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
         is Tool.Wiring -> (if (t.gauge == WireGauge.THICK) Palette.coral else Palette.yellow).let { Palette.cream to Palette.ink }
         Tool.Erase -> Palette.pink to Palette.ink
         Tool.Select -> Palette.surface to Palette.ink
+    }
+
+    /** Picks a tool as if its button were pressed (used by scripted play). */
+    fun pickTool(t: Tool) {
+        val b = toolButtons[t] ?: return
+        b.isChecked = true
     }
 
     private fun addTool(t: Tool, name: String, cost: String) {
@@ -203,7 +209,7 @@ class Hud(private val kit: UiKit, val stage: Stage, private val listener: HudLis
 
     private fun refreshInfo() {
         val p = selected
-        if (p == null || game.board.partAt(p.cell) !== p) {
+        if (p == null || p !in game.board.parts) {
             selected = null
             info.isVisible = false
             infoKey = ""

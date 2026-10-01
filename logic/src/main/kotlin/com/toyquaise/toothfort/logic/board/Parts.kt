@@ -46,9 +46,30 @@ enum class PartKind(val role: Role, val cost: Int, val machine: MachineSpec? = n
     val polar: Boolean get() = role == Role.BATTERY
 }
 
-enum class WireGauge(val cost: Int, val ohmsPerSegment: Double, val maxAmps: Double) {
-    THIN(cost = 1, ohmsPerSegment = 0.12, maxAmps = 2.0),
-    THICK(cost = 3, ohmsPerSegment = 0.03, maxAmps = 10.0),
+/** Wire is sold and resists by length: [costPerUnit] money and [ohmsPerUnit] ohms per unit of counter. */
+enum class WireGauge(val costPerUnit: Double, val ohmsPerUnit: Double, val maxAmps: Double) {
+    THIN(costPerUnit = 1.0, ohmsPerUnit = 0.12, maxAmps = 2.0),
+    THICK(costPerUnit = 3.0, ohmsPerUnit = 0.03, maxAmps = 10.0);
+
+    fun cost(length: Double): Int = maxOf(1, kotlin.math.ceil(length * costPerUnit - 1e-9).toInt())
+}
+
+/** Sizes on the counter, in units. */
+object Layout {
+    /** From a part's centre to each of its terminals, along its axis. */
+    const val TERMINAL_OFFSET = 0.42
+
+    /** Parts may not come closer than twice this, centre to centre (terminals can still touch). */
+    const val PART_RADIUS = 0.38
+
+    /** Half the width of the syrup trail the candies walk. */
+    const val PATH_HALF_WIDTH = 0.42
+
+    /** A terminal dropped this close to another one snaps onto it. */
+    const val SNAP_DISTANCE = 0.32
+
+    /** Terminals this close touch and conduct. */
+    const val CONTACT_DISTANCE = 0.05
 }
 
 /** Electrical constants shared by the board. */

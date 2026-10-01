@@ -15,6 +15,7 @@ import com.toyquaise.toothfort.ui.Strings
  *   --size WxH         window size (default 540x960)
  *   --close-up X,Y     look closely at one cell
  *   --no-hud           draw only the 3D board
+ *   --script "..."     scripted touches, see Options.script
  */
 fun main(args: Array<String>) {
     fun arg(name: String): String? = args.indexOf(name).takeIf { it >= 0 && it + 1 < args.size }?.let { args[it + 1] }
@@ -25,6 +26,7 @@ fun main(args: Array<String>) {
         screenshot = arg("--screenshot")?.let { java.io.File(it).absolutePath },
         seconds = arg("--seconds")?.toFloatOrNull() ?: 6f,
         hideHud = "--no-hud" in args,
+        script = arg("--script"),
         closeUp = arg("--close-up")?.split(",")?.mapNotNull { it.toIntOrNull() }?.takeIf { it.size == 2 }?.let { it[0] to it[1] },
     )
     val config = Lwjgl3ApplicationConfiguration().apply {
