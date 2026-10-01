@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Placeholder icon: a cream tooth on Toyquaise turquoise. To be replaced by a clay render. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path android:fillColor="#16AE9F" android:pathData="M30,14H78A16,16 0,0 1,94 30V78A16,16 0,0 1,78 94H30A16,16 0,0 1,14 78V30A16,16 0,0 1,30 14Z" />
+    <path android:fillColor="#F1E6D2" android:pathData="M54,34C46,26 32,28 32,42C32,52 36,58 38,70C39,78 44,80 46,72L49,62C50,58 58,58 59,62L62,72C64,80 69,78 70,70C72,58 76,52 76,42C76,28 62,26 54,34Z" />
+    <path android:fillColor="#F3B52A" android:pathData="M66,36m-5,0a5,5 0,1 1,10 0a5,5 0,1 1,-10 0" />
+</vector>
