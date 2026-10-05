@@ -10,6 +10,12 @@
         android:isGame="true"
         android:label="@string/app_name"
         android:theme="@style/GdxTheme">
+
+        <!-- The AdMob app id; Google's test id unless a release build is given the real one. -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="${admobAppId}" />
+
         <activity
             android:name=".android.AndroidLauncher"
             android:configChanges="keyboard|keyboardHidden|navigation|orientation|screenSize|screenLayout"

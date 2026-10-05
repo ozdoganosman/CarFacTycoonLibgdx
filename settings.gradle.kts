@@ -1,4 +1,4 @@
-rootProject.name = "toothfort"
+rootProject.name = "vektorpilotu"
 
 dependencyResolutionManagement {
     repositories {
@@ -13,8 +13,9 @@ dependencyResolutionManagement {
     }
 }
 
-// logic: the game rules and the circuit solver, plain Kotlin (no libGDX), tested on the JVM.
-// core: rendering, input and screens (libGDX). lwjgl3: desktop launcher. android: Android launcher.
+// logic: the flight rules, the levels and the solver, plain Kotlin (no libGDX), tested on the JVM.
+// core: rendering, input and screens (libGDX). lwjgl3: desktop launcher. android: Android launcher
+// with AdMob.
 include(":logic", ":core", ":lwjgl3")
 
 // The Android module needs the Android SDK. Without it (a plain JDK machine, some CI jobs) the

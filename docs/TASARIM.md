@@ -1,143 +1,151 @@
-# Macun Kalesi: tasarım belgesi
+# Vektör Pilotu: tasarım belgesi
 
-İngilizce adı **Tooth Fort**. Toyquaise'in öğretici oyunlarından biri: şekerler dişe saldırır, oyuncu
-diş macunu makineleriyle dişi korur. Makineler elektrikle çalışır ve elektrik gerçekten hesaplanır.
+Toyquaise'in öğretici oyunlarından biri. Neon ışıklı bir uzayda küçük bir gemiyi portala
+götürüyorsun. Elinde tek bir şey var: **5 birim yakıt**. Bu yakıtı istediğin yöne, istediğin
+uzunlukta parçalar hâlinde harcıyorsun.
 
-## Sahne: mutfak tezgâhı
+Konu, 9. sınıf fizik dersinin 2. ünitesi: **Kuvvet ve Hareket** (Türkiye Yüzyılı Maarif
+Modeli, FİZ.9.2).
 
-Savaş bir mutfak tezgâhında geçer. Devrilmiş şeker kavanozundan çıkan şekerler tezgâha dökülmüş
-pembe şurup izini takip ederek peçetenin üstünde duran dişe yürür. Tezgâhta kesme tahtası,
-kakaolu kupa, kurabiyeli tabak, meyve kâsesi, oklava, tuzluk gibi mutfak eşyaları vardır. Bunların
-üstüne makine konmaz, ama kablolar üstlerinden aşabilir. Arkadaki fayanslı duvarda bir priz durur;
-şebeke elektriği ve transformatör ileride oradan gelecek.
+## Çekirdek fikir
 
-Mutfak, sonraki fikirlere de yer açar: lavabonun suyu ve dökülen kola iletkendir (kısa devre),
-mutfak aletleri (mikser, tost makinesi) yeni makineler olabilir.
+- **Yakıt skalerdir:** Bir sayıdır ve yönü yoktur. Her bölümde 5 birim yakıt var.
+- **Hamle vektördür:** Oyuncu gemiden parmağını sürükleyip bırakır. Çektiği vektör kareli
+  düzlemin bir noktasına oturur, örneğin (2, 1). Gemi o vektör boyunca uçar.
+- **Her parça kendi büyüklüğü kadar yakıt yakar:** Büyüklük Pisagor'la bulunur. (2, 1) için
+  √5 ≈ 2,24 birim yanar.
+- **Parçalar uç uca eklenir:** Gemi portala tam oturunca bölüm biter.
+- **Asıl soru:** Kristallerin hepsini toplayıp portala 5 birimle nasıl yetişirim?
+  - Dümdüz gitmek hep en ucuzudur.
+  - Her sapma yakıttan yer.
+  - Çapraz parçalar, köşe dönmekten ucuzdur.
 
-## Neden bu fikir
+## Sahne
 
-- Şekerle diş macununun çatışmasını herkes anında anlar. Konunun diş sağlığıyla doğal bir bağı
-  var; veliler bunu sever.
-- Oyun hamuru görünümüyle çok iyi gider: çizgili macun kıvrımları, jelibon ayılar, lolipoplar
-  hamurdan yapılınca harika görünür.
-- Elektrik, ders gibi değil, daha güçlü makineyi çalıştırmanın yolu olarak öğrenilir.
+- **Arka plan:** Koyu mor-lacivert bir uzay, yavaşça kayan üç katman yıldız ve renkli
+  bulutsular.
+- **Harita:** Holografik bir kareli düzlem. Soluk çizgiler, parlayan noktalar, kenarlarda eksen
+  sayıları ve köşelerde bilimkurgu çerçevesi var.
+- **Nesneler:**
+  - gemi: beyaz-camgöbeği, pembe kanatlı, motoru yanan küçük bir roket;
+  - asteroitler: dönen, kraterli kaya parçaları;
+  - kristaller: dönerek süzülen altın elmaslar;
+  - portal: birbirinin tersine dönen pembe ve camgöbeği halkalar.
+- **Menzil:** Geminin çevresinde kalan yakıt kadar yarıçaplı bir nokta halkası durur. Oyuncu
+  nereye yetişebileceğini görür.
 
-## Elektrik savaşta nasıl çalışır
+## Nişan alırken
 
-Her makinenin bir çalışma gerilimi var: diş fırçası 3 V, macun topu 6 V, beyazlatıcı lazer 12 V.
+- **Parça:** Gemiden parmağın altındaki noktaya kalın, altın renkli bir ok.
+- **Bileşenler:** Okun x ve y bileşenleri, kesikli çizgilerle dik üçgenin iki kenarı olarak
+  çizilir. Dik açı işaretlidir; "x: 2", "y: 1" yazar.
+- **Büyüklük:** Okun yanında vektörü ve büyüklüğü yazar, örneğin "(2, 1) |√5 ≈ 2,24|".
+- **Yakıt göstergesi:**
+  - 0'dan 5'e her birimde bir çentik vardır,
+  - yanacak kısım yanıp söner,
+  - yanında "−2,24" yazar.
+- **Toplanacak kristaller** parlar.
+- **Hamle yapılamazsa** ok kırmızı olur. Yoldaki asteroit kırmızı yanar. Bırakınca ekran
+  sarsılır ve nedeni yazılır.
+- **Rüzgârlı bölümlerde:**
+  - parçanın ucundan mor bir rüzgâr oku çıkar,
+  - gerçek yol beyaz "bileşke" okuyla gösterilir,
+  - varılacak yerde hayalet bir gemi durur.
 
-- **Gerilim yetmezse** makine güçsüz kalır: yavaş ve zayıf sıkar. Oyunda makinenin gücü
-  gerilimin karesiyle orantılıdır (P = V²/R). Gerilimin yarısında makine gücünün dörtte birini
-  verir, %35'in altında hiç çalışmaz.
-- **Fazla gerilim** verirsen makine aşırı ısınır ve yanar. Sigorta atabilir.
-- **Pilleri seri bağlarsan** gerilim artar ve güçlü makineyi çalıştırırsın. Oyunda iki pil uç uca
-  (+ ile −) konunca birbirine değer ve seri bağlanır.
-- **Paralel bağlarsan** gerilim aynı kalır ama piller daha uzun dayanır. Uzun bölümlerde bu
-  önemli.
-- **İnce kablo** her karışta gerilim kaybettirir ve çok akımda erir. **Kalın kablo** daha
-  pahalıdır. Oyun boyunca karar hep aynı: bütçe mi, güç mü, menzil mi?
+## Kurallar (kesin hâli `logic/` içinde)
 
-### Uyarı 1: elektrik bir para birimine dönüşmemeli
+- **Konumlar:** Gemi, portal, kristaller ve asteroitler ızgara noktalarındadır. Harita 5 × 7
+  karedir.
+- **Hamle:** Sıfır olmayan tam sayılı bir vektördür. Kalan yakıttan uzun olamaz ve harita
+  dışında bitemez.
+- **Asteroit:** Yolun bir asteroite uzaklığı yarım kareden azsa hamle yapılamaz. Bu yüzden yan
+  yana iki asteroitin arasından geçilmez. Köşe köşeye duran iki asteroitin arasından çapraz
+  geçilir.
+- **Kristal:** Yalnızca gemi tam üstünden geçerse toplanır.
+- **Rüzgâr:** Her hamleye bedava eklenir. Yakıt yalnızca oyuncunun çektiği parça kadar yanar.
+- **Yıldızlar:**
+  - portala varmak 1 yıldız,
+  - her kristal 1 yıldız daha,
+  - en çok 3 yıldız.
+- **Yakıt bitince:** 1 birimden az yakıt kalırsa artık hamle yapılamaz. "Yakıt bitti" çıkar;
+  geri al ya da baştan başla.
+- **Geri al ve Baştan** ücretsizdir.
 
-Arkada küçük bir devre çözücü var (`logic/.../circuit/Network.kt`). Kirchhoff'un akım yasası her
-düğümde bir denklem verir. Denklemler düğüm analiziyle (G·v = i) ve Gauss eliminasyonuyla çözülür.
+**Çözücü** (`Solver.kt`) her (konum, toplanan kristaller) durumunu Dijkstra'yla tarar. En çok
+kristali, sonra en az yakıtı, sonra en az hamleyi seçer. İpucu bundan gelir. Testler her bölümün
+iki kristalle 5 birime sığdığını kanıtlar.
 
-- Pil, iç direnci olan bir gerilim kaynağıdır (0,25 Ω). Kısa devrede akım büyür ama sonludur.
-- Kablo, uzunluğuyla orantılı bir dirençtir (karış başına ince 0,12 Ω, kalın 0,03 Ω).
-- Makine, değeri anma gerilim ve gücünden gelen bir dirençtir.
-- Anahtar ve sigorta çok küçük dirençlerdir; açılınca ya da atınca devreden çıkarlar.
+**Bölüm üreteci** (`GeneratorTest`, `GENERATE=1` ile çalışır) asteroit kalıplarından binlerce
+harita üretir:
 
-Seri ile paralel arasındaki seçim, kablo kalınlığı ve ısınma bu yüzden gerçek stratejik
-kararlardır. Ölçüm etiketleri her makinenin üstünde gerçek gerilimi gösterir.
+- boşluklu duvar,
+- zikzak,
+- küme,
+- köşegen,
+- dağınık.
 
-### Uyarı 2: telefonda kablo çekmek zahmetli olabilir
+Her haritayı çözer ve zorluğa göre sıralar. Bölümler bu adaylar arasından seçilip elle
+düzeltildi.
 
-Izgara yoktur; her şey serbesttir ve parmakla yapılır.
+## Kazanımlar
 
-- **Parça koymak:** Kutudan parçayı seçip tezgâha dokun. Parmağını kaldırana kadar parça
-  parmağının altında süzülür. Konabilecek yerde yeşil, konamayacak yerde (şurup izi, mutfak
-  eşyası, başka bir parça) kırmızı bir halka görünür.
-- **Döndürmek:** Seçili parçanın kartındaki Döndür düğmesi parçayı sekizde bir tur çevirir.
-- **Seri bağlamak:** Bir pili ötekinin ucuna yaklaştırınca uçları birbirine yapışır ve aynı
-  doğrultuya dizilir. Hangi ucun yapışacağını oyuncu seçer: + ile − yapışırsa gerilimler toplanır,
-  + ile + yapışırsa birbirini götürür.
-- **Kablo çekmek:** Kablo aracıyla bir parçanın + ya da − ucuna dokun, parmağını sürükle, başka
-  bir ucun üstünde bırak. Kablo, parmağın çizdiği yoldan geçen yumuşak bir hamur rulosu olur.
-  Boş bir yerde bırakırsan oraya bir **klips** konur; birden çok kablo klipste birleşir.
-- **Uzunluk önemlidir:** Kablonun direnci ve fiyatı uzunluğuyla orantılıdır (birimi "karış",
-  aşağı yukarı bir makine eni). Uzun, dolambaçlı kablo gerilim kaybettirir.
-- **Silmek:** Sil aracıyla bir parçaya, klipse ya da kablonun üstüne dokunmak yeter. Bir parça
-  silinince uçlarındaki kablolar da gider.
+| Kazanım | Oyundaki karşılığı |
+|---|---|
+| FİZ.9.2.2 Skaler ve vektörel nicelikler | Yakıt skaler (çentikli gösterge), hamle vektör (ok) |
+| FİZ.9.2.4 Uç uca ekleme | Parçalar uç uca eklenir; rota oklarla haritada kalır |
+| FİZ.9.2.4 Bileşenlerine ayırma | Nişan alırken x ve y bileşenleri dik üçgenin kenarları olarak çizilir |
+| FİZ.9.2.4 Bileşke vektör | Güneş rüzgârı bölümleri: parça + rüzgâr = bileşke |
+| FİZ.9.2.6 Alınan yol ve yer değiştirme | Bölüm sonunda harcanan yakıt, alınan yol ve yer değiştirme; çıkıştan gemiye kesikli pembe çizgi |
 
-Her parçanın iki ucu vardır: + bir yanda, − karşı yanda. Kablo parçaya yalnızca bu uçlardan
-bağlanır. Makinelerin uçları sarıdır (kutupsuzdur); pilin + ucu mercan, − ucu kömür rengidir.
+Program sınırlarına uyulur:
 
-## Bölüm geçtikçe açılanlar
+- trigonometri yok,
+- yalnızca dik kartezyen koordinatlar,
+- büyüklükler Pisagor'la hesaplanır.
 
-| Sıra | Açılan | Oyundaki etkisi | Müfredattaki karşılığı | Durum |
-|---|---|---|---|---|
-| 1 | Pil, kablo, ilk fırça | Tek makineyi çalıştırırsın | Basit devre (ilkokul) | Oynanır |
-| 2 | Seri ve paralel pil, macun topu | Güçlü makineye gerilim mi, uzun savaşa dayanıklılık mı? | Üreteçlerin bağlanması | Oynanır |
-| 3 | Kalın kablo, anahtar, lazer | Uzak hatlar, makineleri açıp kapatarak pil tasarrufu | Direnç, açık ve kapalı devre | Oynanır |
-| 4 | Sigorta, direnç | Küçük makineyi yüksek gerilimden korursun | Ohm yasası | Parçalar hazır, bölüm yok |
-| 5 | Kondansatör | Yükü biriktirir, tek seferde dev bir macun atışı yapar | Sığa (11. sınıf) | Planlandı |
-| 6 | Jeneratör (pedal, rüzgâr) | Pil bitmez, ama makine ekledikçe çevirmek zorlaşır | İndüksiyon, Lenz | Planlandı |
-| 7 | Transformatör, alternatif akım | Uzak cephelere yüksek gerilimle güç taşırsın | Transformatör (11. sınıf) | Planlandı |
-| 8 | Diyot, LED | Akımın geri kaçmasını önler, ucuz ışık tuzakları kurarsın | Yarı iletkenler (12. sınıf) | Planlandı |
-| 9 | Transistör | Algılayıcı şeker görünce kuleyi açar; küçük sinyal büyük makineyi tetikler | Transistör (12. sınıf) | Planlandı |
+## Bölümler
 
-Güçlü makineler daha çok gerilim ve akım ister. Bu da oyuncuyu kendiliğinden seri pile, kalın
-kabloya ve transformatöre iter.
-
-Kondansatör, çözücüye geri Euler "eşlik modeli" olarak eklenecek (C/dt iletkenlik ve önceki
-gerilimden gelen bir akım). Diyot ve transistör doğrusal olmadığından her adımda birkaç Newton
-yinelemesi gerekecek. Çözücünün yapısı ikisine de hazır.
-
-## Düşmanlar
-
-| Düşman | Davranış | Durum |
+| # | Kısım | Ne öğretir |
 |---|---|---|
-| Şeker küpü | Hızlı, zayıf, kalabalık gelir | Oynanır |
-| Jelibon ayı | Yavaş, dayanıklı | Oynanır |
-| Lolipop | Bölüm sonu canavarı; ileride yalnızca kondansatörlerin aynı anda boşalmasıyla yenilecek | Oynanır (şimdilik çok canlı bir düşman) |
-| Kola şekeri | Yere yapışkan, iletken bir sıvı döker. Kabloların üstünden geçerse kısa devre yaptırır, sigortasız hat yanar | Planlandı |
-| Sakız | Kabloları kemirip koparır ve devreyi açar | Planlandı |
-| Teneke şeker kutusu | Çeliktir; elektromıknatıslı kule onu yavaşlatır ya da çeker | Planlandı |
+| 1 | Kalkış | Tek düz parça; kristaller yolun üstünde |
+| 2 | Kalkış | Çapraz parça: (3, 3) = √18 ≈ 4,24 birim |
+| 3 | Kalkış | Portalı geç ve dön: yol 5, yer değiştirme 3 |
+| 4 | Kalkış | Düz yolun dışındaki kristaller: sapma yakıt ister |
+| 5 | Kalkış | Bir adım yana, sonra uzun çapraz |
+| 6 | Asteroit Kuşağı | Duvardaki tek boşluk |
+| 7 | Asteroit Kuşağı | Çapraz yol kapalı, kenardan tam 5 birim |
+| 8 | Asteroit Kuşağı | Yana, sonra asteroitin üstünden çapraz |
+| 9 | Asteroit Kuşağı | İki duvar, alttaki boşluktan çapraz |
+| 10 | Asteroit Kuşağı | Slalom |
+| 11 | Güneş Rüzgârı | Rüzgâr bedava iter: 3 birim yakıtla 6 kare |
+| 12 | Güneş Rüzgârı | Rüzgârla boşluktan geç |
+| 13 | Güneş Rüzgârı | Batı rüzgârına göre nişan al |
+| 14 | Güneş Rüzgârı | Doğu rüzgârı, tam 5 birim |
+| 15 | Güneş Rüzgârı | Pilotluk sınavı |
 
-## Zaman ve para
+## Reklam (AdMob)
 
-Dalga sürerken zaman akar: piller boşalır, makineler ısınır, kablolar erir. Dalgalar arasında
-zaman durur. Devre yine çözülür ve bütün ölçümler okunur, ama hiçbir şey harcanmaz. Böylece
-oyuncu dalgayı başlatmadan önce gerilimleri görerek dener.
+- **Ödüllü video:** İpucu düğmesinde. Çıkmaz bir konumda reklam gösterilmez, "bir hamle geri
+  al" denir. Reklam yüklenemezse ipucu yine verilir.
+- **Geçiş reklamı:**
+  - yalnızca bölüm aralarında,
+  - ilk 3 bölümden sonra başlar,
+  - her 3 bölümde bir,
+  - iki reklam arasında en az 90 saniye.
+  Kuralları `AdPacing.kt` içindedir.
+- **Banner yok.**
+- **Onay:** Avrupa için onay formu (UMP).
+- **İçerik sınırı:** Reklam içeriği en çok PG düzeyinde.
+- **Kimlikler:** Debug sürümlerinde hep test kimlikleri kullanılır.
 
-Kurarken her şey parasız geri alınır (tam iade). Dalga sırasında satılan parça yarı fiyatına
-gider; yanan makine ve eriyen kablo para etmez. Biten pil, kalan yükü oranında daha ucuza
-yenilenir.
+## Yol haritası
 
-## Görünüm
-
-Görsel dil toyquaise.com'dan gelir: nane yeşili masada oyun hamuru.
-
-- **Renkler:** sitenin hamur renkleri (`art/scenes.mjs` içindeki `clayColors`). Turkuaz, petrol,
-  sarı, mercan, pembe, mor, krem, kömür.
-- **Yazı:** başlık ve düğmelerde DynaPuff, metinde Lexend (okuma akıcılığı için tasarlandı).
-- **Yoğrulmuş modeller:** her şekil ince bölünür, sonra el yapımı gibi yoğrulur: yüzey yavaş
-  bir gürültüyle içeri dışarı itilir, rastgele yerlere başparmak izi bastırılır. Işık her yumruyu
-  ve çukuru görsün diye normaller de buna göre eğilir.
-- **Mıncıklama:** her şey hamur gibi ezilip yaylanır. Konan parça yere düşen bir hamur topu gibi
-  yayvanlaşıp toparlanır. Parmağın bastığı parça ezilir, bırakınca zıplar. Vurulan şeker
-  sarsılır, ateş eden top geri teper, ısırılan diş titrer. Hacim korunur: aşağı ezilen yanlara
-  taşar.
-- **Hamur gölgelendiricisi:** sitenin SVG "clay" filtresinin 3D karşılığıdır.
-  - Gürültüyle hafifçe bozulmuş yüzeyler.
-  - Geniş, yumuşak, mat ışık ve düşük, geniş bir parlama.
-  - İnce parmak izi dokusu ve biraz düzensiz renk.
-  - Turkuaza çalan yumuşak gölgeler.
-  - Karakterlerin hamuru saniyede sekiz kez kıpırdar, stop-motion hissi verir.
-- **Şekiller:** sitenin çizimleri gibi, her model top, yuvarlatılmış kutu, döndürülmüş şekil ve
-  rulodan (yılan) yoğrulur. Dosya ya da model indirilmez; her şey kodla üretilir.
-
-## Adlar
-
-Macun Kalesi (Türkçe), Tooth Fort (İngilizce). Diş Kalesi de düşünüldü. Paket kimliği
-`com.toyquaise.toothfort`; Google Play'e ilk yüklemeden sonra değiştirilemez.
+- **Ses ve müzik:** motor uğultusu, kristal çınlaması, portal sesi.
+- **Yeni kısımlar:**
+  - kara delik (yakıt bedava ama yön büker),
+  - hareketli asteroitler,
+  - yakıt istasyonu.
+- **Hız bölümleri (FİZ.9.2.6):** Süre ölçülür, sürat ve hız ayrımı oynanarak öğrenilir.
+- **İngilizce metinler** ve dünya geneline yayın.
+- **Günün haritası:** Üreteç ve çözücüyle her gün yeni bir harita.
+- **Mağaza:** simge, tanıtım videosu (`--autoplay --record`), gizlilik politikası.

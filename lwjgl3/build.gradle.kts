@@ -14,8 +14,8 @@ dependencies {
 }
 
 application {
-    mainClass.set("com.toyquaise.toothfort.lwjgl3.Lwjgl3LauncherKt")
-    applicationName = "toothfort"
+    mainClass.set("com.toyquaise.vektor.lwjgl3.Lwjgl3LauncherKt")
+    applicationName = "vektorpilotu"
 }
 
 // The shared assets folder is both the working directory of `run` and part of the jar.
@@ -28,10 +28,10 @@ tasks.named<JavaExec>("run") {
     if (System.getProperty("os.name").lowercase().contains("mac")) jvmArgs("-XstartOnFirstThread")
 }
 
-// A single runnable jar: ./gradlew :lwjgl3:dist -> lwjgl3/build/libs/toothfort-<version>.jar
+// A single runnable jar: ./gradlew :lwjgl3:dist -> lwjgl3/build/libs/vektorpilotu-<version>.jar
 tasks.register<Jar>("dist") {
     group = "distribution"
-    archiveBaseName.set("toothfort")
+    archiveBaseName.set("vektorpilotu")
     manifest { attributes["Main-Class"] = application.mainClass.get() }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from(sourceSets.main.get().output)

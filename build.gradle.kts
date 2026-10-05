@@ -21,7 +21,7 @@ buildscript {
 
 subprojects {
     version = "0.1.0"
-    group = "com.toyquaise.toothfort"
+    group = "com.toyquaise.vektor"
 
     // Android runs Java 17 bytecode; every JVM module targets it too.
     plugins.withId("org.jetbrains.kotlin.jvm") {

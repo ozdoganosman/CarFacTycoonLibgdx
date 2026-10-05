@@ -1,20 +1,37 @@
-// Android launcher. Built only where an Android SDK is installed (see settings.gradle.kts).
+// Android launcher with AdMob. Built only where an Android SDK is installed (see settings.gradle.kts).
 //   ./gradlew :android:assembleDebug -> android/build/outputs/apk/debug/
 // Kotlin comes from the Android plugin's built-in Kotlin support (no kotlin-android plugin).
+//
+// AdMob ids: debug builds always use Google's test ids. Release builds take the real ones from
+// Gradle properties (~/.gradle/gradle.properties or -P): admob.appId, admob.interstitial,
+// admob.rewarded; without them they fall back to the test ids too.
 plugins {
     id("com.android.application")
 }
 
+/** Google's public test ids: safe to click, never pay. */
+object TestAds {
+    const val APP = "ca-app-pub-3940256099942544~3347511713"
+    const val INTERSTITIAL = "ca-app-pub-3940256099942544/1033173712"
+    const val REWARDED = "ca-app-pub-3940256099942544/5224354917"
+}
+
+fun admob(name: String, test: String): String = (findProperty("admob.$name") as String?)?.takeIf { it.isNotBlank() } ?: test
+
 android {
-    namespace = "com.toyquaise.toothfort"
+    namespace = "com.toyquaise.vektor"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.toyquaise.toothfort"
+        applicationId = "com.toyquaise.vektorpilotu"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
         versionName = "0.1.0"
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     compileOptions {
@@ -23,8 +40,16 @@ android {
     }
 
     buildTypes {
+        debug {
+            manifestPlaceholders["admobAppId"] = TestAds.APP
+            buildConfigField("String", "ADMOB_INTERSTITIAL", "\"${TestAds.INTERSTITIAL}\"")
+            buildConfigField("String", "ADMOB_REWARDED", "\"${TestAds.REWARDED}\"")
+        }
         release {
             isMinifyEnabled = false
+            manifestPlaceholders["admobAppId"] = admob("appId", TestAds.APP)
+            buildConfigField("String", "ADMOB_INTERSTITIAL", "\"${admob("interstitial", TestAds.INTERSTITIAL)}\"")
+            buildConfigField("String", "ADMOB_REWARDED", "\"${admob("rewarded", TestAds.REWARDED)}\"")
         }
     }
 }
@@ -35,6 +60,8 @@ val natives = configurations.create("natives")
 dependencies {
     implementation(project(":core"))
     implementation(libs.gdx.backend.android)
+    implementation(libs.admob)
+    implementation(libs.ump)
     for (abi in abis) {
         natives(variantOf(libs.gdx.platform) { classifier("natives-$abi") })
         natives(variantOf(libs.gdx.freetype.platform) { classifier("natives-$abi") })

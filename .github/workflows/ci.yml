@@ -21,20 +21,24 @@ jobs:
       - name: Tests, desktop jar and Android APK
         run: ./gradlew :logic:test :lwjgl3:dist :android:assembleDebug --stacktrace
 
-      - name: Screenshot (software OpenGL)
+      - name: Screenshots (software OpenGL)
         env:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           mkdir -p build/screens
-          for level in 1 2 3; do
-            xvfb-run -a java -jar lwjgl3/build/libs/toothfort-*.jar --level $level --demo --seconds 9 --size 540x1170 --screenshot "$PWD/build/screens/level$level.png"
-          done
+          jar=$(ls lwjgl3/build/libs/vektorpilotu-*.jar)
+          shot() { xvfb-run -a java -jar "$jar" --size 540x1170 --screenshot "$PWD/build/screens/$1.png" "${@:2}"; }
+          shot menu
+          shot level1 --level 1
+          shot level9 --level 9 --aim-hint
+          shot level13 --level 13 --steps 1 --aim-hint
+          shot level6-end --level 6 --finish
 
       - uses: actions/upload-artifact@v4
         with:
-          name: macun-kalesi
+          name: vektor-pilotu
           path: |
             android/build/outputs/apk/debug/*.apk
-            lwjgl3/build/libs/toothfort-*.jar
+            lwjgl3/build/libs/vektorpilotu-*.jar
             build/screens/*.png
           if-no-files-found: error

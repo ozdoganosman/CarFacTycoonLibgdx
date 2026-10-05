@@ -1,17 +1,21 @@
-# Macun Kalesi (Tooth Fort)
+# Vektör Pilotu
 
-Mutfak tezgâhında şekerler dişe saldırıyor. Diş fırçası, macun topu ve beyazlatıcı lazer dişi
-koruyor, ama hepsi elektrikle çalışıyor ve devreyi sen kuruyorsun: parçaları tezgâhın istediğin
-yerine koyuyor, kabloları parmağınla çiziyorsun. Pilleri uç uca yapıştırırsan (seri) gerilim artar,
-yan yana bağlarsan (paralel) piller uzun dayanır. Uzun ve ince kablo gerilim kaybettirir; fazla
-gerilim makineyi yakar. Arkada gerçek bir devre çözücü var.
+Neon ışıklı bir uzayda küçük bir gemi var; elinde **5 birim yakıt**. Gemiden parmağını
+sürükleyip bırakarak istediğin yöne, istediğin uzunlukta vektörler çekiyorsun. Her parça kendi
+büyüklüğü kadar yakıt yakıyor: (2, 1) için √5 ≈ 2,24 birim. Asteroitlerin arasından geçip
+kristalleri topluyor ve portala ulaşıyorsun. Güneş rüzgârı bölümlerinde rüzgâr her hamleye
+bedava eklenir.
 
-Toyquaise'in öğretici oyunu. LibGDX + Kotlin ile yazılmış, 3D oyun hamuru görünümünde; hedef
-Android. Arayüz Türkçe. Tasarım belgesi: [docs/TASARIM.md](docs/TASARIM.md).
+9. sınıf fizik, **Kuvvet ve Hareket** ünitesi için Toyquaise'in öğretici oyunu. Konular skaler
+ve vektörel nicelikler, vektör toplama, bileşenler, alınan yol ve yer değiştirme. LibGDX ve
+Kotlin ile yazıldı. Hedef Android; reklamlar AdMob ile. Arayüz Türkçe.
+
+- Tasarım belgesi: [docs/TASARIM.md](docs/TASARIM.md)
 
 <p>
-  <img src="docs/img/level3.png" width="300" alt="Bölüm 3: mutfak tezgâhı, seri bağlı piller ve kalın kabloyla macun topu">
-  <img src="docs/img/closeup.png" width="460" alt="Yoğrulmuş hamur modeller: macun topu, kalın kablo ve pil yakından">
+  <img src="docs/img/level9.png" width="270" alt="Bölüm 9: asteroit duvarları arasında nişan, bileşenler ve yakıt göstergesi">
+  <img src="docs/img/level13.png" width="270" alt="Bölüm 13: rüzgâr oku ve bileşke">
+  <img src="docs/img/menu.png" width="270" alt="Başlık ekranı ve bölümler">
 </p>
 
 ## Çalıştırmak
@@ -19,81 +23,107 @@ Android. Arayüz Türkçe. Tasarım belgesi: [docs/TASARIM.md](docs/TASARIM.md).
 JDK 17 ya da üstü yeter; Gradle kendini indirir.
 
 ```bash
-./gradlew :lwjgl3:run          # masaüstü penceresi (telefon gibi dik)
-./gradlew :logic:test          # devre çözücü ve oyun kuralları testleri
-./gradlew :lwjgl3:dist         # tek dosyalık çalıştırılabilir jar: lwjgl3/build/libs/
+./gradlew :lwjgl3:run              # masaüstü penceresi (telefon gibi dik)
+./gradlew :logic:test              # kurallar, çözücü ve bölüm testleri
+./gradlew :lwjgl3:dist             # tek dosyalık jar: lwjgl3/build/libs/
 ./gradlew :android:assembleDebug   # APK: android/build/outputs/apk/debug/ (Android SDK gerekir)
 ```
 
-Android Studio ile projeyi açmak yeterli. Android SDK yoksa (`ANDROID_HOME` ya da
-`local.properties` içinde `sdk.dir`) `:android` modülü atlanır; masaüstü ve testler yine derlenir.
+Android Studio ile projeyi açmak yeterli. Android SDK yoksa `:android` modülü atlanır;
+masaüstü ve testler yine derlenir. SDK'yı `ANDROID_HOME` ya da `local.properties` içindeki
+`sdk.dir` gösterir.
 
 ### Geliştirirken
 
 ```bash
-# Bölüm 2'yi aç, örnek bir savunma kur, dalganın 9 saniyesini oynat, ekran görüntüsü al ve çık:
-./gradlew :lwjgl3:run --args="--level 2 --demo --seconds 9 --screenshot $PWD/shot.png"
-# Bir kareye yakından bak (modelleri denetlemek için), arayüz olmadan:
-./gradlew :lwjgl3:run --args="--level 2 --demo --close-up 3,3 --no-hud"
-# Pencere boyutu: --size 1080x2340
-# Dokunuşları sırayla oynat (kontrolleri denemek için): bkz. Options.script
-java -jar lwjgl3/build/libs/toothfort-0.1.0.jar --level 2 --screenshot $PWD/s.png \
-  --script "tool battery; down 2.4 3.2; up 2.4 3.2; tool battery; down 3.35 3.28; up 3.35 3.28; wait 10; shot"
+java -jar lwjgl3/build/libs/vektorpilotu-0.1.0.jar --level 13 --steps 1 --aim-hint
 ```
 
-Ekranı olmayan bir makinede: `xvfb-run -a ./gradlew :lwjgl3:run --args="..."`.
+Bu komut 13. bölümü açar. İpucuyla bir hamle yapar ve sıradakini nişanlanmış gösterir.
 
-## Nasıl oynanır
+| Seçenek | Ne yapar |
+|---|---|
+| `--level N` | Başlık ekranı yerine N. bölümü açar |
+| `--steps K` | İpucuyla K hamle yapar |
+| `--aim X,Y` | (X, Y) hamlesini nişanlanmış gösterir |
+| `--aim-hint` | İpucunun hamlesini nişanlanmış gösterir |
+| `--finish` | Bölümü bitirir, bölüm sonu panelini gösterir |
+| `--screenshot DOSYA` | Ekran görüntüsü kaydedip çıkar; ilerleme kaydedilmez |
+| `--size 540x1170` | Pencere boyutu |
+| `--no-hud` | Yalnızca harita |
+| `--autoplay` | Bölümü ipuçlarıyla kendi kendine oynar |
+| `--record KLASÖR` | Her kareyi (saniyede 30) kaydeder, sonra çıkar; `--seconds S` ne kadar süreceğini söyler |
 
-1. Aşağıdaki kutudan bir parça seç (Pil, Fırça…) ve tezgâha dokun. Parmağını kaldırana kadar
-   parça parmağının altında süzülür; yeşil halka "konur", kırmızı halka "konmaz" demektir.
-   Seçili parçanın kartındaki **Döndür** onu sekizde bir tur çevirir.
-2. Bir pili ötekinin ucuna yaklaştır: uçlar yapışır. + ile − yapışırsa seri bağlanmış olur.
-3. **Kablo**yu seç, bir parçanın + ya da − ucundan başlayıp parmağını sürükle, başka bir uçta
-   bırak. Boşlukta bırakırsan bir klips konur; kablolar orada birleşir. Pilin + ucu mercan, − ucu
-   kömür renginde, makinelerin uçları sarı.
-4. Devre kapanınca kablolarda akım boncukları akar ve makinenin üstünde gerçek gerilim yazar:
-   yeşil yeterli, sarı az, mercan fazla.
-5. **Dalgayı başlat.** Zaman yalnızca dalga sırasında akar: piller boşalır, makineler ısınır.
-   Kurarken her şey parasız geri alınır.
+Ekranı olmayan bir makinede: `xvfb-run -a java -jar ...`.
+
+Tanıtım videosu:
+
+```bash
+java -jar lwjgl3/build/libs/vektorpilotu-0.1.0.jar --size 540x1170 --level 13 --autoplay --record kareler --seconds 16
+ffmpeg -framerate 30 -i kareler/frame%04d.png -c:v libx264 -pix_fmt yuv420p tanitim.mp4
+```
+
+Yeni bölüm adayları üretmek için:
+
+```bash
+GENERATE=1 ./gradlew :logic:test --tests '*GeneratorTest*' --rerun-tasks
+```
+
+Adaylar `logic/build/candidates.txt` dosyasına yazılır.
+
+## AdMob
+
+- **Debug sürümleri** her zaman Google'ın test kimliklerini kullanır.
+- **Release sürümü** gerçek kimlikleri Gradle özelliklerinden alır. Bunları
+  `~/.gradle/gradle.properties` dosyasına koy; depoya koyma:
+
+  ```properties
+  admob.appId=ca-app-pub-XXXXXXXXXXXXXXXX~YYYYYYYYYY
+  admob.interstitial=ca-app-pub-XXXXXXXXXXXXXXXX/ZZZZZZZZZZ
+  admob.rewarded=ca-app-pub-XXXXXXXXXXXXXXXX/WWWWWWWWWW
+  ```
+
+Reklamların nerede ve ne sıklıkta çıktığı:
+
+- İpucu düğmesinde ödüllü video.
+- Bölüm aralarında, seyrek geçiş reklamı.
+- Banner yok.
+- Avrupa için onay formu (UMP).
+
+### Yayından önce
+
+- [ ] AdMob'da uygulamayı ve iki reklam birimini (geçiş, ödüllü) aç; kimlikleri yukarıdaki gibi ver.
+- [ ] AdMob'da "Gizlilik ve mesajlaşma" altında GDPR mesajını oluştur.
+- [ ] Bir gizlilik politikası sayfası yayımla ve `app-ads.txt` dosyasını sitende yayımla.
+- [ ] Play Console'da hedef kitleyi "13 yaş ve üstü" seç; reklam ve veri güvenliği formlarını doldur.
+- [ ] Release imzası için bir anahtar oluştur. Anahtar dosyaları `.gitignore`'da.
 
 ## Proje yapısı
 
 ```
-logic/    oyunun kuralları, LibGDX'siz düz Kotlin; JVM'de test edilir
-  circuit/Network.kt    düğüm analiziyle devre çözücü (Kirchhoff akım yasası)
-  board/Board.kt        tezgâh: serbest konumlu parçalar, uç uca yapışma, klipsler, kablolar → devre;
-                        pil, ısı, erime, sigorta
-  board/Parts.kt        parçalar, kablo kalınlıkları, elektrik sabitleri
-  game/Level.kt         şurup izi, mutfak eşyaları, düşmanlar, dalgalar, bölümler
-  game/Game.kt          oyun döngüsü, makinelerin saldırısı, para
-core/     LibGDX: 3D hamur görünümü, dokunma, arayüz
-  render/ClayRenderer.kt   gölge haritası ve hamur gölgelendiricisi (assets/shaders/clay.*)
-  render/MeshData.kt       top, yuvarlatılmış kutu, döndürülmüş şekil, rulo; hepsi yoğrulur
-  render/Kitchen.kt        şurup izi ve kablolar
-  render/Models.kt         bütün modeller (pil, fırça, macun topu, lazer, şekerler, diş, mutfak…)
-  render/WorldView.kt      sahne, mıncıklama yayları, canlandırma, parçacıklar
-  PlayScreen.kt            kamera, parmakla yerleştirme ve kablo çizme, ölçüm etiketleri
-  ui/                      arayüz (DynaPuff ve Lexend), metinler
-lwjgl3/   masaüstü başlatıcı (geliştirme, ekran görüntüleri)
-android/  Android başlatıcı (com.toyquaise.toothfort)
-assets/   yazı tipleri ve gölgelendiriciler (masaüstü ve Android ortak)
+logic/    kurallar, LibGDX'siz düz Kotlin; JVM'de test edilir
+  Vec.kt        tam sayılı vektörler
+  Level.kt      harita, kısımlar (kazanımlar), asteroitler ve kristaller
+  Flight.kt     oynanan bölüm: yakıt, hamleler, rüzgâr, geri alma, yıldızlar
+  Solver.kt     Dijkstra: en çok kristal, en az yakıt; ipuçları
+  Levels.kt     15 bölüm
+  AdPacing.kt   geçiş reklamının sıklığı
+core/     LibGDX: neon çizim, ekranlar, arayüz
+  gfx/Gfx.kt        parlayan çizgi, ok, halka, ışık; çokgenler
+  gfx/Sprites.kt    gemi, asteroit, kristal, portal
+  gfx/Starfield.kt  uzay arka planı
+  PlayScreen.kt     harita, nişan alma, uçuş, yakıt göstergesi, bölüm sonu
+  MenuScreen.kt     başlık ve bölümler
+  ui/               yazı tipleri (Russo One, Chakra Petch), paneller, simgeler, metinler
+lwjgl3/   masaüstü başlatıcı (geliştirme, ekran görüntüleri, video)
+android/  Android başlatıcı ve AdMob (com.toyquaise.vektorpilotu)
+assets/   yazı tipleri
 docs/     tasarım belgesi ve görseller
 ```
 
-Sürümler `gradle/libs.versions.toml` içinde: LibGDX 1.14.2, Kotlin 2.4.20, Android Gradle
-eklentisi 9.4.1, Gradle 9.8.
-
-## Yol haritası
-
-- Bölüm 4: sigorta ve direnç (parçalar ve testleri hazır). Kola şekeri kısa devre yaptırır.
-- Kondansatör (dev macun atışı) ve lolipop canavarı; jeneratör, transformatör, diyot, transistör.
-- Sakız (kabloyu koparır), teneke kutu (elektromıknatıs).
-- Ses: fırça vızıltısı, macun "plop"u, kısa devre çıtırtısı.
-- İngilizce metinler, bölüm seçme ekranı, kayıt.
-- Mağaza için simge ve görseller; toyquaise.com'a proje sayfası.
+Sürümler `gradle/libs.versions.toml` içinde.
 
 ## Lisanslar
 
-DynaPuff ve Lexend yazı tipleri SIL Open Font License 1.1 ile dağıtılır
+Russo One ve Chakra Petch yazı tipleri SIL Open Font License 1.1 ile dağıtılır
 (`assets/fonts/*-OFL.txt`). Oyunun kodu, görselleri ve metinleri Toyquaise'e aittir.

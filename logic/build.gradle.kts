@@ -1,4 +1,5 @@
-// Game rules and the circuit solver. No libGDX here, so everything runs and is tested on a plain JVM.
+// The flight rules, the levels and the solver. No libGDX here, so everything runs and is tested on
+// a plain JVM.
 plugins {
     kotlin("jvm")
     `java-library`
