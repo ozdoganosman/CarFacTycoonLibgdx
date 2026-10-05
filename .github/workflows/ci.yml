@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - uses: gradle/actions/setup-gradle@v5
+
+      # The runner has the Android SDK (ANDROID_HOME), so settings.gradle.kts includes :android.
+      - name: Tests, desktop jar and Android APK
+        run: ./gradlew :logic:test :lwjgl3:dist :android:assembleDebug --stacktrace
+
+      - name: Screenshots (software OpenGL)
+        env:
+          LIBGL_ALWAYS_SOFTWARE: "1"
+        run: |
+          mkdir -p build/screens
+          jar=$(ls lwjgl3/build/libs/hamurkaptan-*.jar)
+          shot() { xvfb-run -a java -jar "$jar" --size 540x1170 --screenshot "$PWD/build/screens/$1.png" "${@:2}"; }
+          shot menu
+          shot level1 --level 1 --preview
+          shot level7 --level 7 --steps 1 --preview
+          shot level11 --level 11 --steps 1 --preview
+          shot level15 --level 15 --preview
+          shot level16-end --level 16 --finish
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: hamur-kaptan
+          path: |
+            android/build/outputs/apk/debug/*.apk
+            lwjgl3/build/libs/hamurkaptan-*.jar
+            build/screens/*.png
+          if-no-files-found: error
