@@ -1,176 +1,151 @@
-# Hamur Kaptan: tasarım belgesi
+# Vektör Pilotu: tasarım belgesi
 
-Toyquaise'in öğretici oyunlarından biri. Oyuncu, kareli bir denizde hamurdan bir römorkörü
-vektör kartlarıyla limana götürür. Konu, 9. sınıf fizik dersinin 2. ünitesidir: **Kuvvet ve
-Hareket** (Türkiye Yüzyılı Maarif Modeli, FİZ.9.2).
+Toyquaise'in öğretici oyunlarından biri. Neon ışıklı bir uzayda küçük bir gemiyi portala
+götürüyorsun. Elinde tek bir şey var: **5 birim yakıt**. Bu yakıtı istediğin yöne, istediğin
+uzunlukta parçalar hâlinde harcıyorsun.
 
-## Neden bu fikir
+Konu, 9. sınıf fizik dersinin 2. ünitesi: **Kuvvet ve Hareket** (Türkiye Yüzyılı Maarif
+Modeli, FİZ.9.2).
 
-- **Program bunu istiyor:** FİZ.9.2.4 vektör toplamayı kareli düzlemde, "simülasyon ve animasyon
-  gibi dijital içerikler" ile öğretmeyi öneriyor. Oyun, öğretmenin derste açabileceği bir
-  materyaldir.
-- **Bulmaca türü tutar:** Tek parmakla oynanır ve bölümlüdür. Bölüm araları reklama doğal yer
-  açar.
-- **Dilden bağımsız:** Vektörler her dilde aynıdır. Aynı oyun ileride İngilizce olarak da
-  yayımlanabilir; reklam fiyatı orada daha yüksektir.
-- **Hamur görünümü:** Toyquaise'in hamur dünyası Macun Kalesi'nden (Tooth Fort) gelir.
-  Görüntüleyici ve gölgelendiriciler aynıdır.
+## Çekirdek fikir
 
-## Sahne: kareli deniz
+- **Yakıt skalerdir:** Bir sayıdır ve yönü yoktur. Her bölümde 5 birim yakıt var.
+- **Hamle vektördür:** Oyuncu gemiden parmağını sürükleyip bırakır. Çektiği vektör kareli
+  düzlemin bir noktasına oturur, örneğin (2, 1). Gemi o vektör boyunca uçar.
+- **Her parça kendi büyüklüğü kadar yakıt yakar:** Büyüklük Pisagor'la bulunur. (2, 1) için
+  √5 ≈ 2,24 birim yanar.
+- **Parçalar uç uca eklenir:** Gemi portala tam oturunca bölüm biter.
+- **Asıl soru:** Kristallerin hepsini toplayıp portala 5 birimle nasıl yetişirim?
+  - Dümdüz gitmek hep en ucuzudur.
+  - Her sapma yakıttan yer.
+  - Çapraz parçalar, köşe dönmekten ucuzdur.
 
-Deniz, kumsal bir kenarın içinde turkuaz bir hamur levhadır. Üstüne açık renk hamur şeritlerden
-kareler bastırılmıştır. Bu, defterdeki kareli düzlemin kendisidir: x doğuya (sağa), y kuzeye
-(yukarı) artar. Kenarlarda koordinat sayıları yazar.
+## Sahne
 
-- **Tekne:** Kaptanıyla birlikte mercan renkli bir römorkör.
-- **Liman:** Çizgili bir can simidi ve yanında küçük bir deniz feneri.
-- **Kayalar:** Izgara noktalarında duran gri, yosunlu hamur topakları.
-- **Çıkış noktası:** Krem renkli küçük bir halka. Yer değiştirme buradan ölçülür.
-- **Akıntı:** Akıntılı bölümlerde akıntı yönünde süzülen köpük okları.
+- **Arka plan:** Koyu mor-lacivert bir uzay, yavaşça kayan üç katman yıldız ve renkli
+  bulutsular.
+- **Harita:** Holografik bir kareli düzlem. Soluk çizgiler, parlayan noktalar, kenarlarda eksen
+  sayıları ve köşelerde bilimkurgu çerçevesi var.
+- **Nesneler:**
+  - gemi: beyaz-camgöbeği, pembe kanatlı, motoru yanan küçük bir roket;
+  - asteroitler: dönen, kraterli kaya parçaları;
+  - kristaller: dönerek süzülen altın elmaslar;
+  - portal: birbirinin tersine dönen pembe ve camgöbeği halkalar.
+- **Menzil:** Geminin çevresinde kalan yakıt kadar yarıçaplı bir nokta halkası durur. Oyuncu
+  nereye yetişebileceğini görür.
 
-## Nasıl oynanır
+## Nişan alırken
 
-1. Alttaki **kartlar** vektördür: (3, 0) "3 kare doğu", (0, −2) "2 kare güney" demektir. Her
-   kartın üstünde küçük bir ok resmi vardır.
-2. Bir kart seçilince denizde **önizleme okları** çıkar:
-   - kart vektörü (sarı),
-   - varsa akıntı (mor),
-   - bileşke (mercan).
-   Hamlenin bittiği yerde yarı saydam bir tekne görünür. Hamle bir kayaya çarpar ya da denizden
-   çıkarsa kaya kırmızı yanıp söner ve nedeni hemen yazılır.
-3. **Yola çık** ile tekne hamleyi yapar. Kart harcanır. Geçilen yol koyu bir okla denizde kalır.
-4. **Jetonlar** bölüme göre verilir ve seçili karta uygulanır:
-   - **×2**, **×½**: vektörü gerçek bir sayıyla çarpar. Yön aynı kalır, boy değişir.
-   - **×(−1)**: zıt vektör. Boy aynı kalır, yön ters döner.
-   - **Ayır**: kartı x ve y bileşenlerine ayırır, örneğin (3, 4) = (3, 0) + (0, 4). Bu bir hamle
-     sayılmaz.
-   - **Birlikte**: iki kart seçilir. İki römorkör tekneyi aynı anda çeker ve tekne
-     paralelkenarın köşegeninden dümdüz gider.
-5. **Geri al** son hamleyi ya da ayırmayı geri alır. **Baştan** bölümü yeniden başlatır.
-   İkisi de ücretsizdir.
-6. **İpucu** (ödüllü reklam): en iyi çözümün sıradaki adımını seçer ve açıklar. Reklam
-   yüklenemezse ipucu yine verilir. Çıkmaz bir konumda reklam gösterilmez; "bir hamle geri al"
-   denir.
-7. Limana varınca bölüm sonu kartı açılır:
-   - yıldızlar,
-   - hamle sayısı ve en iyisi,
-   - alınan yol,
-   - yer değiştirme (vektörü ve büyüklüğü),
-   - "yer değiştirme, alınan yoldan kısadır" notu.
+- **Parça:** Gemiden parmağın altındaki noktaya kalın, altın renkli bir ok.
+- **Bileşenler:** Okun x ve y bileşenleri, kesikli çizgilerle dik üçgenin iki kenarı olarak
+  çizilir. Dik açı işaretlidir; "x: 2", "y: 1" yazar.
+- **Büyüklük:** Okun yanında vektörü ve büyüklüğü yazar, örneğin "(2, 1) |√5 ≈ 2,24|".
+- **Yakıt göstergesi:**
+  - 0'dan 5'e her birimde bir çentik vardır,
+  - yanacak kısım yanıp söner,
+  - yanında "−2,24" yazar.
+- **Toplanacak kristaller** parlar.
+- **Hamle yapılamazsa** ok kırmızı olur. Yoldaki asteroit kırmızı yanar. Bırakınca ekran
+  sarsılır ve nedeni yazılır.
+- **Rüzgârlı bölümlerde:**
+  - parçanın ucundan mor bir rüzgâr oku çıkar,
+  - gerçek yol beyaz "bileşke" okuyla gösterilir,
+  - varılacak yerde hayalet bir gemi durur.
 
 ## Kurallar (kesin hâli `logic/` içinde)
 
-- **Konumlar:** Tekne ve kayalar ızgara noktalarındadır. Denizin noktaları (0, 0) ile
-  (genişlik, yükseklik) arasındadır.
-- **Hamle:** Seçilen kart vektörlerinin (çarpanlarıyla) ve akıntının toplamıdır. Tekne bu
-  bileşke boyunca dümdüz gider.
-- **Kaya:** Yolun bir kayaya uzaklığı 0,35 kareden azsa tekne karaya oturur ve hamle yapılamaz.
-  Örnekler:
-  - (1, 3) eğimli bir yol, yanındaki noktaya 0,32 kare yaklaşır: geçemez.
-  - (1, 2) eğimli bir yol 0,45 kare uzaktan geçer: geçer.
-  - İki kayanın arasından çapraz geçmek serbesttir.
-- **Deniz sınırı:** Hamle denizin dışında biterse yapılamaz.
-- **Akıntı sıfırlarsa:** Akıntının bir kartı tam sıfırladığı hamle yapılamaz.
-- **×½:** Yalnızca bileşenleri çift olan karta uygulanır; yarım kare yoktur.
+- **Konumlar:** Gemi, portal, kristaller ve asteroitler ızgara noktalarındadır. Harita 5 × 7
+  karedir.
+- **Hamle:** Sıfır olmayan tam sayılı bir vektördür. Kalan yakıttan uzun olamaz ve harita
+  dışında bitemez.
+- **Asteroit:** Yolun bir asteroite uzaklığı yarım kareden azsa hamle yapılamaz. Bu yüzden yan
+  yana iki asteroitin arasından geçilmez. Köşe köşeye duran iki asteroitin arasından çapraz
+  geçilir.
+- **Kristal:** Yalnızca gemi tam üstünden geçerse toplanır.
+- **Rüzgâr:** Her hamleye bedava eklenir. Yakıt yalnızca oyuncunun çektiği parça kadar yanar.
 - **Yıldızlar:**
-  - 3 yıldız: en az hamle ve o hamle sayısıyla en kısa yol.
-  - 2 yıldız: en iyiden en çok bir fazla hamle.
-  - 1 yıldız: limana varmak.
-  - Bir bölüm, öncekinde en az bir yıldız alınca açılır.
+  - portala varmak 1 yıldız,
+  - her kristal 1 yıldız daha,
+  - en çok 3 yıldız.
+- **Yakıt bitince:** 1 birimden az yakıt kalırsa artık hamle yapılamaz. "Yakıt bitti" çıkar;
+  geri al ya da baştan başla.
+- **Geri al ve Baştan** ücretsizdir.
 
-**Çözücü** (`logic/.../Solver.kt`) bütün olasılıkları dener ve gördüğü durumları hatırlar. Her
-bölüm için en iyi yolu (önce en az hamle, sonra en kısa yol) bulur. Üç işi var:
+**Çözücü** (`Solver.kt`) her (konum, toplanan kristaller) durumunu Dijkstra'yla tarar. En çok
+kristali, sonra en az yakıtı, sonra en az hamleyi seçer. İpucu bundan gelir. Testler her bölümün
+iki kristalle 5 birime sığdığını kanıtlar.
 
-- yıldızların ölçüsünü belirlemek,
-- ipucu vermek,
-- testlerde her bölümün bitirilebildiğini ve öğretmesi gerekeni gerçekten öğrettiğini kanıtlamak.
-  Örneğin 14. bölüm ayırmadan, 15. bölüm birlikte çekmeden bitmez; 4, 5, 6 ve 13. bölümler
-  jetonsuz aynı iyilikte bitmez.
+**Bölüm üreteci** (`GeneratorTest`, `GENERATE=1` ile çalışır) asteroit kalıplarından binlerce
+harita üretir:
+
+- boşluklu duvar,
+- zikzak,
+- küme,
+- köşegen,
+- dağınık.
+
+Her haritayı çözer ve zorluğa göre sıralar. Bölümler bu adaylar arasından seçilip elle
+düzeltildi.
 
 ## Kazanımlar
 
-| Kazanım | Oyundaki karşılığı | Durum |
-|---|---|---|
-| FİZ.9.2.3 Aynı doğrultudaki vektörler; eşit, zıt ve gerçek sayıyla çarpılmış vektör | Kanal bölümleri (1–6): uç uca toplama, zıt kart, ×2, ×½, ×(−1) | Oynanır |
-| FİZ.9.2.4 Uç uca ekleme | Liman bölümleri (7–10): sıranın bileşkeyi değil rotayı değiştirmesi | Oynanır |
-| FİZ.9.2.4 Bileşke vektör | Akıntı bölümleri (11–13): kart + akıntı = bileşke üçgeni | Oynanır |
-| FİZ.9.2.4 Bileşenlerine ayırma, paralelkenar yöntemi | Römorkör bölümleri (14–16): Ayır ve Birlikte | Oynanır |
-| FİZ.9.2.6 Konum, alınan yol, yer değiştirme | Her bölüm sonunda alınan yol ve yer değiştirme; denizdeki noktalı bileşke oku | Kısmen |
-| FİZ.9.2.6 Sürat, hız, ortalama ve anlık değerler | "Yeşil Dalga" bölümleri: trafik ışıklarına sürat ayarı, ortalama hız koridoru | Planlandı |
-| FİZ.9.2.1, 9.2.2, 9.2.5, 9.2.7 Sınıflandırmalar | Bölüm aralarında kısa ayırma oyunları: banttan gelen niceliği doğru kutuya at | Planlandı |
+| Kazanım | Oyundaki karşılığı |
+|---|---|
+| FİZ.9.2.2 Skaler ve vektörel nicelikler | Yakıt skaler (çentikli gösterge), hamle vektör (ok) |
+| FİZ.9.2.4 Uç uca ekleme | Parçalar uç uca eklenir; rota oklarla haritada kalır |
+| FİZ.9.2.4 Bileşenlerine ayırma | Nişan alırken x ve y bileşenleri dik üçgenin kenarları olarak çizilir |
+| FİZ.9.2.4 Bileşke vektör | Güneş rüzgârı bölümleri: parça + rüzgâr = bileşke |
+| FİZ.9.2.6 Alınan yol ve yer değiştirme | Bölüm sonunda harcanan yakıt, alınan yol ve yer değiştirme; çıkıştan gemiye kesikli pembe çizgi |
 
 Program sınırlarına uyulur:
 
 - trigonometri yok,
-- yalnızca dik kartezyen koordinat sistemi,
-- hareket grafiği ve ivmeli hareket hesabı yok.
-
-Büyüklükler kareli düzlemde Pisagor'la bulunur, örneğin (3, 4) için 5 kare.
+- yalnızca dik kartezyen koordinatlar,
+- büyüklükler Pisagor'la hesaplanır.
 
 ## Bölümler
 
-| # | Kısım | Ne öğretir | Kartlar ve jetonlar |
-|---|---|---|---|
-| 1 | Kanal | Kart bir vektördür | (0, 4) |
-| 2 | Kanal | Uç uca toplama; fazla kart | (0, 2), (0, 4), (0, 3) |
-| 3 | Kanal | Zıt yönlü vektör; sıra önemli (kanaldan çıkma) | (0, 5), (0, −2), (0, 4) |
-| 4 | Kanal | ×2: gerçek sayıyla çarpma | (0, 3), (0, 2); ×2 |
-| 5 | Kanal | ×(−1): zıt vektör | (0, 2), (0, 6); ×(−1) |
-| 6 | Kanal | ×½; uzun yol da var ama iki hamle | (0, 6), (0, 4); ×½, ×(−1) |
-| 7 | Liman | Bileşke; yol 7, yer değiştirme 5 | (3, 0), (0, 4) |
-| 8 | Liman | Sıra bileşkeyi değil rotayı değiştirir | (3, 0), (0, 4); kaya |
-| 9 | Liman | Eğik kartların bileşenleri ayrı toplanır | (2, 1), (1, 3), (2, 0) |
-| 10 | Liman | Kalan vektöre eşit toplamı bul | beş kart |
-| 11 | Akıntı | Kart + akıntı = bileşke | (0, 2), (0, 2); akıntı (1, 0) |
-| 12 | Akıntı | Akıntıya karşı | üç kart; akıntı (0, −1) |
-| 13 | Akıntı | Akıntı ve ×2 birlikte | üç kart; ×2; akıntı (1, 0) |
-| 14 | Römorkörler | Bileşenlerine ayırma | (3, 4); Ayır |
-| 15 | Römorkörler | Paralelkenar yöntemi | (3, 0), (0, 3); Birlikte |
-| 16 | Römorkörler | Kaptanlık sınavı | dört kart; Ayır, Birlikte, ×(−1); akıntı (0, 1) |
+| # | Kısım | Ne öğretir |
+|---|---|---|
+| 1 | Kalkış | Tek düz parça; kristaller yolun üstünde |
+| 2 | Kalkış | Çapraz parça: (3, 3) = √18 ≈ 4,24 birim |
+| 3 | Kalkış | Portalı geç ve dön: yol 5, yer değiştirme 3 |
+| 4 | Kalkış | Düz yolun dışındaki kristaller: sapma yakıt ister |
+| 5 | Kalkış | Bir adım yana, sonra uzun çapraz |
+| 6 | Asteroit Kuşağı | Duvardaki tek boşluk |
+| 7 | Asteroit Kuşağı | Çapraz yol kapalı, kenardan tam 5 birim |
+| 8 | Asteroit Kuşağı | Yana, sonra asteroitin üstünden çapraz |
+| 9 | Asteroit Kuşağı | İki duvar, alttaki boşluktan çapraz |
+| 10 | Asteroit Kuşağı | Slalom |
+| 11 | Güneş Rüzgârı | Rüzgâr bedava iter: 3 birim yakıtla 6 kare |
+| 12 | Güneş Rüzgârı | Rüzgârla boşluktan geç |
+| 13 | Güneş Rüzgârı | Batı rüzgârına göre nişan al |
+| 14 | Güneş Rüzgârı | Doğu rüzgârı, tam 5 birim |
+| 15 | Güneş Rüzgârı | Pilotluk sınavı |
 
 ## Reklam (AdMob)
 
-- **Ödüllü video:** yalnızca İpucu düğmesinde. Oyuncu kendi ister, oyunu kesmez. Reklam
-  fiyatı en yüksek türdür.
+- **Ödüllü video:** İpucu düğmesinde. Çıkmaz bir konumda reklam gösterilmez, "bir hamle geri
+  al" denir. Reklam yüklenemezse ipucu yine verilir.
 - **Geçiş reklamı:**
-  - yalnızca bölüm aralarında, "Sonraki bölüm"e basınca,
+  - yalnızca bölüm aralarında,
   - ilk 3 bölümden sonra başlar,
-  - her 3 bitirilen bölümde bir,
+  - her 3 bölümde bir,
   - iki reklam arasında en az 90 saniye.
-  Bu kurallar `logic/.../AdPacing.kt` içinde, testleriyle birlikte.
-- **Banner yok:** Geliri düşük, ekranı daraltır, öğretmenin sınıfta açtığı oyunda dikkat
-  dağıtır.
-- **Onay:** Avrupa ve benzeri yerlerde Google'ın onay formu (UMP) açılış ekranında çıkar. Onay
-  gelmeden reklam istenmez. Gerekiyorsa menüde "Gizlilik ayarları" düğmesi çıkar.
-- **İçerik sınırı:** Reklamlar en çok PG (ebeveyn rehberliği) düzeyinde istenir, çünkü oyun
-  okulda oynanır.
-- **Hedef kitle:** 9. sınıf öğrencileri 14–15 yaşındadır. Play Console'da hedef kitle 13 yaş ve
-  üstü seçilir. Böylece çocuk uygulamalarına özel Aile politikası zorunlu olmaz.
-- **Kimlikler:**
-  - Debug sürümleri hep Google'ın test kimliklerini kullanır.
-  - Gerçek kimlikler yalnızca release sürümüne Gradle özellikleriyle verilir (bkz. README).
-  - Geliştirirken kendi reklamına asla tıklama; AdMob hesabı kapanabilir.
+  Kuralları `AdPacing.kt` içindedir.
+- **Banner yok.**
+- **Onay:** Avrupa için onay formu (UMP).
+- **İçerik sınırı:** Reklam içeriği en çok PG düzeyinde.
+- **Kimlikler:** Debug sürümlerinde hep test kimlikleri kullanılır.
 
 ## Yol haritası
 
-- **Yeşil Dalga (FİZ.9.2.6):**
-  - Hamur arabaların süratini ayarlayıp bütün ışıklara yeşilde yetişmek.
-  - Ortalama hız koridoru, kamera önünde yavaşlayan ama ortalamada hızlı gideni yakalar; anlık
-    ve ortalama sürat farkı buradan öğrenilir.
-  - Program, trafikteki yeşil dalgayı ve sürat cezalarını örnek veriyor.
-- **Sınıflandırma oyunları (FİZ.9.2.1, 9.2.2, 9.2.5, 9.2.7):**
-  - temel ve türetilmiş nicelikler,
-  - skaler ve vektörel nicelikler,
-  - dört temel kuvvet,
-  - öteleme, dönme ve titreşim hareketi.
-- **Ses:**
-  - motor pıtırtısı,
-  - can simidine varınca düdük,
-  - kayaya yaklaşınca çıtırtı.
+- **Ses ve müzik:** motor uğultusu, kristal çınlaması, portal sesi.
+- **Yeni kısımlar:**
+  - kara delik (yakıt bedava ama yön büker),
+  - hareketli asteroitler,
+  - yakıt istasyonu.
+- **Hız bölümleri (FİZ.9.2.6):** Süre ölçülür, sürat ve hız ayrımı oynanarak öğrenilir.
 - **İngilizce metinler** ve dünya geneline yayın.
-- **Günün bulmacası:** Çözücüyle doğrulanmış, her gün yeni bir deniz.
-- **Mağaza:** simge ve ekran görüntüleri (hamur görüntüleyiciyle), gizlilik politikası sayfası,
-  toyquaise.com'da proje sayfası.
-- **Seri:** Macun Kalesi'nin elektrik konuları ileriki sınıfların elektrik ünitelerine oturur.
-  Aynı motorla bir Toyquaise serisi olur. AdMob'un kendi uygulamalarını tanıtma reklamlarıyla
-  oyunlar birbirini ücretsiz tanıtır.
+- **Günün haritası:** Üreteç ve çözücüyle her gün yeni bir harita.
+- **Mağaza:** simge, tanıtım videosu (`--autoplay --record`), gizlilik politikası.

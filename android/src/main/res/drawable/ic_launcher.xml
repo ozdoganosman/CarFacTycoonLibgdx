@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Placeholder icon: a squared sea, a vector arrow and the tugboat's coral hull. To be replaced by a clay render. -->
+<!-- Placeholder icon: deep space, a portal ring and a neon vector arrow. To be replaced by a render. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <path android:fillColor="#4CC3C9" android:pathData="M30,14H78A16,16 0,0 1,94 30V78A16,16 0,0 1,78 94H30A16,16 0,0 1,14 78V30A16,16 0,0 1,30 14Z" />
-    <path android:strokeColor="#EEFAF7" android:strokeWidth="2" android:pathData="M34,14V94M54,14V94M74,14V94M14,34H94M14,54H94M14,74H94" />
-    <path android:strokeColor="#F3B52A" android:strokeWidth="6" android:strokeLineCap="round" android:pathData="M34,74L66,42" />
-    <path android:fillColor="#F3B52A" android:pathData="M76,32L58,38L70,50Z" />
-    <path android:fillColor="#EC5A3F" android:pathData="M24,76H52A14,10 0,0 1,24 76Z" />
-    <path android:fillColor="#F1E6D2" android:pathData="M31,64H43V76H31Z" />
-    <path android:fillColor="#F3B52A" android:pathData="M30,61H44V65H30Z" />
+    <path android:fillColor="#1B0D44" android:pathData="M30,14H78A16,16 0,0 1,94 30V78A16,16 0,0 1,78 94H30A16,16 0,0 1,14 78V30A16,16 0,0 1,30 14Z" />
+    <path android:strokeColor="#FF4FD8" android:strokeWidth="5" android:pathData="M74,38m-12,0a12,12 0,1 1,24 0a12,12 0,1 1,-24 0" />
+    <path android:strokeColor="#3FF3FF" android:strokeWidth="3" android:pathData="M74,38m-6,0a6,6 0,1 1,12 0a6,6 0,1 1,-12 0" />
+    <path android:strokeColor="#FFD23F" android:strokeWidth="6" android:strokeLineCap="round" android:pathData="M30,78L56,52" />
+    <path android:fillColor="#FFD23F" android:pathData="M64,44L46,50L58,62Z" />
+    <path android:strokeColor="#F2F7FF" android:strokeWidth="2" android:strokeAlpha="0.6" android:pathData="M30,78H56V52" />
 </vector>

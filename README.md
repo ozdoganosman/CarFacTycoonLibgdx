@@ -1,21 +1,21 @@
-# Hamur Kaptan
+# Vektör Pilotu
 
-Kareli bir denizde hamurdan bir römorkör var; onu vektör kartlarıyla limana götürüyorsun. Kartlar
-uç uca eklenir. ×2, ×½ ve ×(−1) jetonları kartı bir gerçek sayıyla çarpar. Akıntı her hamleye
-kendi vektörünü ekler. Ayır, eğik bir kartı bileşenlerine böler. Birlikte, iki römorkörü aynı
-anda çektirir; tekne paralelkenarın köşegeninden gider. Bölüm sonunda alınan yol ile yer
-değiştirme yan yana yazar.
+Neon ışıklı bir uzayda küçük bir gemi var; elinde **5 birim yakıt**. Gemiden parmağını
+sürükleyip bırakarak istediğin yöne, istediğin uzunlukta vektörler çekiyorsun. Her parça kendi
+büyüklüğü kadar yakıt yakıyor: (2, 1) için √5 ≈ 2,24 birim. Asteroitlerin arasından geçip
+kristalleri topluyor ve portala ulaşıyorsun. Güneş rüzgârı bölümlerinde rüzgâr her hamleye
+bedava eklenir.
 
-9. sınıf fizik, **Kuvvet ve Hareket** ünitesi (Maarif Modeli FİZ.9.2.3 ve FİZ.9.2.4) için
-Toyquaise'in öğretici oyunu. LibGDX ve Kotlin ile yazıldı, 3D oyun hamuru görünümünde. Hedef
-Android; reklamlar AdMob ile. Arayüz Türkçe.
+9. sınıf fizik, **Kuvvet ve Hareket** ünitesi için Toyquaise'in öğretici oyunu. Konular skaler
+ve vektörel nicelikler, vektör toplama, bileşenler, alınan yol ve yer değiştirme. LibGDX ve
+Kotlin ile yazıldı. Hedef Android; reklamlar AdMob ile. Arayüz Türkçe.
 
 - Tasarım belgesi: [docs/TASARIM.md](docs/TASARIM.md)
 
 <p>
-  <img src="docs/img/level11.png" width="270" alt="Bölüm 11: akıntılı denizde kart, akıntı ve bileşke okları">
-  <img src="docs/img/level15.png" width="270" alt="Bölüm 15: iki römorkör, paralelkenar ve köşegen">
-  <img src="docs/img/menu.png" width="270" alt="Bölüm listesi ve hamur römorkör">
+  <img src="docs/img/level9.png" width="270" alt="Bölüm 9: asteroit duvarları arasında nişan, bileşenler ve yakıt göstergesi">
+  <img src="docs/img/level13.png" width="270" alt="Bölüm 13: rüzgâr oku ve bileşke">
+  <img src="docs/img/menu.png" width="270" alt="Başlık ekranı ve bölümler">
 </p>
 
 ## Çalıştırmak
@@ -36,32 +36,40 @@ masaüstü ve testler yine derlenir. SDK'yı `ANDROID_HOME` ya da `local.propert
 ### Geliştirirken
 
 ```bash
-java -jar lwjgl3/build/libs/hamurkaptan-0.1.0.jar --level 11 --steps 1 --preview
+java -jar lwjgl3/build/libs/vektorpilotu-0.1.0.jar --level 13 --steps 1 --aim-hint
 ```
 
-Bu komut 11. bölümü açar. İpucuyla bir hamle yapar ve sıradaki hamlenin oklarını gösterir.
+Bu komut 13. bölümü açar. İpucuyla bir hamle yapar ve sıradakini nişanlanmış gösterir.
 
 | Seçenek | Ne yapar |
 |---|---|
-| `--level N` | Bölüm listesi yerine N. bölümü açar |
+| `--level N` | Başlık ekranı yerine N. bölümü açar |
 | `--steps K` | İpucuyla K hamle yapar |
-| `--preview` | Sıradaki hamleyi seçer, okları görünür |
-| `--pick I` | Eldeki I. kartı seçer (0'dan başlar) |
-| `--finish` | Bölümü bitirir, bölüm sonu kartını gösterir |
+| `--aim X,Y` | (X, Y) hamlesini nişanlanmış gösterir |
+| `--aim-hint` | İpucunun hamlesini nişanlanmış gösterir |
+| `--finish` | Bölümü bitirir, bölüm sonu panelini gösterir |
 | `--screenshot DOSYA` | Ekran görüntüsü kaydedip çıkar; ilerleme kaydedilmez |
 | `--size 540x1170` | Pencere boyutu |
-| `--no-hud` | Yalnızca 3D deniz |
+| `--no-hud` | Yalnızca harita |
 | `--autoplay` | Bölümü ipuçlarıyla kendi kendine oynar |
-| `--record KLASÖR` | Her kareyi (saniyede 30) klasöre kaydeder, sonra çıkar; `--seconds S` ne kadar süreceğini söyler |
+| `--record KLASÖR` | Her kareyi (saniyede 30) kaydeder, sonra çıkar; `--seconds S` ne kadar süreceğini söyler |
 
-Mağaza için bir tanıtım videosu şöyle çıkar:
+Ekranı olmayan bir makinede: `xvfb-run -a java -jar ...`.
+
+Tanıtım videosu:
 
 ```bash
-java -jar lwjgl3/build/libs/hamurkaptan-0.1.0.jar --size 540x1170 --level 16 --autoplay --record kareler --seconds 16
+java -jar lwjgl3/build/libs/vektorpilotu-0.1.0.jar --size 540x1170 --level 13 --autoplay --record kareler --seconds 16
 ffmpeg -framerate 30 -i kareler/frame%04d.png -c:v libx264 -pix_fmt yuv420p tanitim.mp4
 ```
 
-Ekranı olmayan bir makinede: `xvfb-run -a java -jar ...`.
+Yeni bölüm adayları üretmek için:
+
+```bash
+GENERATE=1 ./gradlew :logic:test --tests '*GeneratorTest*' --rerun-tasks
+```
+
+Adaylar `logic/build/candidates.txt` dosyasına yazılır.
 
 ## AdMob
 
@@ -75,47 +83,41 @@ Ekranı olmayan bir makinede: `xvfb-run -a java -jar ...`.
   admob.rewarded=ca-app-pub-XXXXXXXXXXXXXXXX/WWWWWWWWWW
   ```
 
-  Özellikler yoksa release sürümü de test kimlikleriyle derlenir.
-
-Reklamların nerede ve ne sıklıkta çıktığı tasarım belgesinde anlatılıyor:
+Reklamların nerede ve ne sıklıkta çıktığı:
 
 - İpucu düğmesinde ödüllü video.
 - Bölüm aralarında, seyrek geçiş reklamı.
 - Banner yok.
 - Avrupa için onay formu (UMP).
-- Reklam içeriği en çok PG düzeyinde.
 
 ### Yayından önce
 
 - [ ] AdMob'da uygulamayı ve iki reklam birimini (geçiş, ödüllü) aç; kimlikleri yukarıdaki gibi ver.
 - [ ] AdMob'da "Gizlilik ve mesajlaşma" altında GDPR mesajını oluştur.
-- [ ] Bir gizlilik politikası sayfası yayımla. Play Console bunu ister.
-- [ ] `app-ads.txt` dosyasını sitende yayımla.
-- [ ] Play Console'da hedef kitleyi "13 yaş ve üstü" seç. Reklam içerdiğini ve veri güvenliği
-      formunu (AdMob'un topladıkları) doldur.
+- [ ] Bir gizlilik politikası sayfası yayımla ve `app-ads.txt` dosyasını sitende yayımla.
+- [ ] Play Console'da hedef kitleyi "13 yaş ve üstü" seç; reklam ve veri güvenliği formlarını doldur.
 - [ ] Release imzası için bir anahtar oluştur. Anahtar dosyaları `.gitignore`'da.
 
 ## Proje yapısı
 
 ```
 logic/    kurallar, LibGDX'siz düz Kotlin; JVM'de test edilir
-  Vec.kt        tam sayılı vektörler, çarpanlar (×2, ×½, ×−1), jetonlar
-  Level.kt      deniz haritası, kısımlar (kazanımlar), kayalar ve deniz sınırı
-  Voyage.kt     oynanan bölüm: hamleler, ayırma, birlikte çekme, geri alma, yıldızlar
-  Solver.kt     en iyi yol (en az hamle, sonra en kısa yol); ipuçları
-  Levels.kt     16 bölüm
+  Vec.kt        tam sayılı vektörler
+  Level.kt      harita, kısımlar (kazanımlar), asteroitler ve kristaller
+  Flight.kt     oynanan bölüm: yakıt, hamleler, rüzgâr, geri alma, yıldızlar
+  Solver.kt     Dijkstra: en çok kristal, en az yakıt; ipuçları
+  Levels.kt     15 bölüm
   AdPacing.kt   geçiş reklamının sıklığı
-core/     LibGDX: 3D hamur görünümü, ekranlar, arayüz
-  render/ClayRenderer.kt  gölge haritası ve hamur gölgelendiricisi (assets/shaders/clay.*)
-  render/MeshData.kt      top, yuvarlatılmış kutu, döndürülmüş şekil, rulo; hepsi yoğrulur
-  render/Models.kt        römorkör, kayalar, can simidi ve fener, oklar, kareli deniz
-  render/SeaView.kt       deniz, tekne, rota, önizleme okları, akıntı, parçacıklar
-  PlayScreen.kt           bir bölüm: kamera, okların etiketleri, eksen sayıları
-  MenuScreen.kt           bölüm listesi ve yıldızlar
-  ui/                     arayüz (DynaPuff ve Lexend), metinler
-lwjgl3/   masaüstü başlatıcı (geliştirme, ekran görüntüleri)
-android/  Android başlatıcı ve AdMob (com.toyquaise.hamurkaptan)
-assets/   yazı tipleri ve gölgelendiriciler (masaüstü ve Android ortak)
+core/     LibGDX: neon çizim, ekranlar, arayüz
+  gfx/Gfx.kt        parlayan çizgi, ok, halka, ışık; çokgenler
+  gfx/Sprites.kt    gemi, asteroit, kristal, portal
+  gfx/Starfield.kt  uzay arka planı
+  PlayScreen.kt     harita, nişan alma, uçuş, yakıt göstergesi, bölüm sonu
+  MenuScreen.kt     başlık ve bölümler
+  ui/               yazı tipleri (Russo One, Chakra Petch), paneller, simgeler, metinler
+lwjgl3/   masaüstü başlatıcı (geliştirme, ekran görüntüleri, video)
+android/  Android başlatıcı ve AdMob (com.toyquaise.vektorpilotu)
+assets/   yazı tipleri
 docs/     tasarım belgesi ve görseller
 ```
 
@@ -123,5 +125,5 @@ Sürümler `gradle/libs.versions.toml` içinde.
 
 ## Lisanslar
 
-DynaPuff ve Lexend yazı tipleri SIL Open Font License 1.1 ile dağıtılır
+Russo One ve Chakra Petch yazı tipleri SIL Open Font License 1.1 ile dağıtılır
 (`assets/fonts/*-OFL.txt`). Oyunun kodu, görselleri ve metinleri Toyquaise'e aittir.

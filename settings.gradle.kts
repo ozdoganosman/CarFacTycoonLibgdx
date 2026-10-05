@@ -1,4 +1,4 @@
-rootProject.name = "hamurkaptan"
+rootProject.name = "vektorpilotu"
 
 dependencyResolutionManagement {
     repositories {
@@ -13,7 +13,7 @@ dependencyResolutionManagement {
     }
 }
 
-// logic: the voyage rules, the levels and the solver, plain Kotlin (no libGDX), tested on the JVM.
+// logic: the flight rules, the levels and the solver, plain Kotlin (no libGDX), tested on the JVM.
 // core: rendering, input and screens (libGDX). lwjgl3: desktop launcher. android: Android launcher
 // with AdMob.
 include(":logic", ":core", ":lwjgl3")

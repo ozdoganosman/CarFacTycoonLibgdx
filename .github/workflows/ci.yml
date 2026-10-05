@@ -26,20 +26,19 @@ jobs:
           LIBGL_ALWAYS_SOFTWARE: "1"
         run: |
           mkdir -p build/screens
-          jar=$(ls lwjgl3/build/libs/hamurkaptan-*.jar)
+          jar=$(ls lwjgl3/build/libs/vektorpilotu-*.jar)
           shot() { xvfb-run -a java -jar "$jar" --size 540x1170 --screenshot "$PWD/build/screens/$1.png" "${@:2}"; }
           shot menu
-          shot level1 --level 1 --preview
-          shot level7 --level 7 --steps 1 --preview
-          shot level11 --level 11 --steps 1 --preview
-          shot level15 --level 15 --preview
-          shot level16-end --level 16 --finish
+          shot level1 --level 1
+          shot level9 --level 9 --aim-hint
+          shot level13 --level 13 --steps 1 --aim-hint
+          shot level6-end --level 6 --finish
 
       - uses: actions/upload-artifact@v4
         with:
-          name: hamur-kaptan
+          name: vektor-pilotu
           path: |
             android/build/outputs/apk/debug/*.apk
-            lwjgl3/build/libs/hamurkaptan-*.jar
+            lwjgl3/build/libs/vektorpilotu-*.jar
             build/screens/*.png
           if-no-files-found: error

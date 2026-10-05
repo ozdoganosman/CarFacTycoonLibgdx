@@ -19,11 +19,11 @@ object TestAds {
 fun admob(name: String, test: String): String = (findProperty("admob.$name") as String?)?.takeIf { it.isNotBlank() } ?: test
 
 android {
-    namespace = "com.toyquaise.kaptan"
+    namespace = "com.toyquaise.vektor"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.toyquaise.hamurkaptan"
+        applicationId = "com.toyquaise.vektorpilotu"
         minSdk = 24
         targetSdk = 36
         versionCode = 1
