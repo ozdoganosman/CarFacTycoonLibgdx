@@ -149,8 +149,37 @@ class PlayScreen(private val app: KaptanGame, val levelNumber: Int) : ScreenAdap
 
     // ------------------------------------------------------------------ frame
 
+    private var autoTimer = 0f
+    private var autoSplit: Int? = null
+
+    /** Plays the level with the hints: show the next move, wait, sail, and again (for videos). */
+    private fun autoplay(dt: Float) {
+        if (!app.options.autoplay || view.busy || voyage.arrived) return
+        autoTimer += dt
+        val split = autoSplit
+        when {
+            split != null && autoTimer > 1.6f -> {
+                autoSplit = null
+                autoTimer = 0f
+                hud.clearPlan()
+                split(split)
+            }
+            split == null && hud.plan() == null && autoTimer > 1.3f -> {
+                autoTimer = 0f
+                val h = Solver.hint(voyage) ?: return
+                showHint(h)
+                if (h is Solver.Hint.Split) autoSplit = h.card.id
+            }
+            split == null && hud.plan() != null && autoTimer > 2.2f -> {
+                autoTimer = 0f
+                hud.plan()?.let(::go)
+            }
+        }
+    }
+
     override fun render(delta: Float) {
         val dt = minOf(delta, 0.1f)
+        autoplay(dt)
         view.update(dt)
         hud.locked = view.busy || finished
         if (!view.busy && !voyage.arrived && voyage.hand.isEmpty() && !outOfCardsShown) {

@@ -51,6 +51,15 @@ Bu komut 11. bölümü açar. İpucuyla bir hamle yapar ve sıradaki hamlenin ok
 | `--screenshot DOSYA` | Ekran görüntüsü kaydedip çıkar; ilerleme kaydedilmez |
 | `--size 540x1170` | Pencere boyutu |
 | `--no-hud` | Yalnızca 3D deniz |
+| `--autoplay` | Bölümü ipuçlarıyla kendi kendine oynar |
+| `--record KLASÖR` | Her kareyi (saniyede 30) klasöre kaydeder, sonra çıkar; `--seconds S` ne kadar süreceğini söyler |
+
+Mağaza için bir tanıtım videosu şöyle çıkar:
+
+```bash
+java -jar lwjgl3/build/libs/hamurkaptan-0.1.0.jar --size 540x1170 --level 16 --autoplay --record kareler --seconds 16
+ffmpeg -framerate 30 -i kareler/frame%04d.png -c:v libx264 -pix_fmt yuv420p tanitim.mp4
+```
 
 Ekranı olmayan bir makinede: `xvfb-run -a java -jar ...`.
 

@@ -32,6 +32,11 @@ class Options(
     val hideHud: Boolean = false,
     /** Keep progress in memory only (screenshots, tests), not in the device's preferences. */
     val volatile: Boolean = false,
+    /** Play the level by itself with the hints, at a watchable pace (for videos). */
+    val autoplay: Boolean = false,
+    /** Save every frame into this folder for [seconds] seconds (for videos), then quit. */
+    val record: String? = null,
+    val seconds: Float = 12f,
 )
 
 class KaptanGame(val options: Options = Options(), val ads: Ads = NoAds) : Game() {
@@ -78,25 +83,35 @@ class KaptanGame(val options: Options = Options(), val ads: Ads = NoAds) : Game(
     }
 
     override fun render() {
-        super.render()
-        val path = options.screenshot ?: return
+        // While recording, time runs at the video's frame rate however slowly frames are drawn.
+        screen?.render(if (options.record != null) 1f / RECORD_FPS else Gdx.graphics.deltaTime)
         frames++
-        // Some frames for the boat to sail and the view to settle, then save what is on screen.
+        options.record?.let { dir ->
+            capture("$dir/frame%04d.png".format(frames))
+            if (frames >= options.seconds * RECORD_FPS) Gdx.app.exit()
+        }
+        val path = options.screenshot ?: return
+        // Some frames for the view to settle, then save what is on screen.
         if (frames == SCREENSHOT_FRAME) {
-            val w = Gdx.graphics.backBufferWidth
-            val h = Gdx.graphics.backBufferHeight
-            val pm = Pixmap.createFromFrameBuffer(0, 0, w, h)
-            val flipped = Pixmap(w, h, Pixmap.Format.RGBA8888)
-            for (y in 0 until h) flipped.drawPixmap(pm, 0, y, w, 1, 0, h - 1 - y, w, 1)
-            // The back buffer may carry alpha; a screenshot should not.
-            flipped.blending = Pixmap.Blending.None
-            for (y in 0 until h) for (x in 0 until w) flipped.drawPixel(x, y, flipped.getPixel(x, y) or 0xff)
-            PixmapIO.writePNG(Gdx.files.absolute(path), flipped)
-            pm.dispose()
-            flipped.dispose()
+            capture(path)
             Gdx.app.log("HamurKaptan", "screenshot saved to $path")
             Gdx.app.exit()
         }
+    }
+
+    /** Saves what is on screen as a PNG. */
+    private fun capture(path: String) {
+        val w = Gdx.graphics.backBufferWidth
+        val h = Gdx.graphics.backBufferHeight
+        val pm = Pixmap.createFromFrameBuffer(0, 0, w, h)
+        val flipped = Pixmap(w, h, Pixmap.Format.RGBA8888)
+        for (y in 0 until h) flipped.drawPixmap(pm, 0, y, w, 1, 0, h - 1 - y, w, 1)
+        // The back buffer may carry alpha; a screenshot should not.
+        flipped.blending = Pixmap.Blending.None
+        for (y in 0 until h) for (x in 0 until w) flipped.drawPixel(x, y, flipped.getPixel(x, y) or 0xff)
+        PixmapIO.writePNG(Gdx.files.absolute(path), flipped)
+        pm.dispose()
+        flipped.dispose()
     }
 
     override fun dispose() {
@@ -111,5 +126,6 @@ class KaptanGame(val options: Options = Options(), val ads: Ads = NoAds) : Game(
         const val UI_WIDTH = 540f
         const val UI_HEIGHT = 960f
         const val SCREENSHOT_FRAME = 24
+        const val RECORD_FPS = 30
     }
 }
